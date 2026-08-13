@@ -2,7 +2,7 @@
 
 **Project:** RWAMP — Extended WAMP v2 implementation for Java 25+
 **Date:** 2026-08-13
-**Status: In Progress (Phase 0 completed — lego-flow changes merged)**
+**Status: In Progress (Phase 1 complete, Phase 2 ready)**
 
 ---
 
@@ -54,16 +54,16 @@ upstream in lego-flow (see Section 3).
 
 ### 2.2 What RWAMP Adds (New Code)
 
-| Feature | Source Inspiration | Module |
-|---------|-------------------|--------|
-| Session kill procedures (`wamp.session.kill*`) | xLib `WAMP_FP_SessionMetaAPI` | `rwamp-feature-session` |
-| Testament API (`wamp.session.add_testament`) | xLib `WAMP_FP_TestamentMetaAPI` | `rwamp-feature-testament` |
-| Virtual sessions (`virtual_session.register`) | xLib `WAMP_FP_VirtualSession` | `rwamp-feature-virtual` |
-| Reflection API (`wamp.reflection.*`) | xLib `WAMP_FP_Reflection` | `rwamp-feature-reflection` |
-| Statistics tracking | xLib `WAMPStatistics` | `rwamp-feature-statistics` |
-| REST over WAMP bridge | xLib `REST_WAMP_MethodsProvider` | `rwamp-rest` |
-| Call rerouting | xLib `WAMPRPCDealer` rerouting | `rwamp-feature-rerouting` |
-| Pattern-based registration | xLib `WAMPRPCDealer` pattern | `rwamp-feature-registration` |
+| Feature | Source Inspiration | Module | Status |
+|---------|-------------------|--------|--------|
+| Session kill procedures (`wamp.session.kill*`) | xLib `WAMP_FP_SessionMetaAPI` | `rwamp-feature-session` | ✅ Done |
+| Testament API (`wamp.session.add_testament`) | xLib `WAMP_FP_TestamentMetaAPI` | `rwamp-feature-testament` | ⬜ Phase 2 |
+| Virtual sessions (`virtual_session.register`) | xLib `WAMP_FP_VirtualSession` | `rwamp-feature-virtual` | ⬜ Phase 2 |
+| Reflection API (`wamp.reflection.*`) | xLib `WAMP_FP_Reflection` | `rwamp-feature-reflection` | ⬜ Phase 2 |
+| Statistics tracking | xLib `WAMPStatistics` | `rwamp-feature-statistics` | ✅ Done |
+| REST over WAMP bridge | xLib `REST_WAMP_MethodsProvider` | `rwamp-rest` | ⬜ Phase 3 |
+| Call rerouting | xLib `WAMPRPCDealer` rerouting | `rwamp-feature-rerouting` | ⬜ Phase 3 |
+| Pattern-based registration | xLib `WAMPRPCDealer` pattern | `rwamp-feature-registration` | ⬜ Phase 4 |
 
 ### 2.3 Module Structure
 
@@ -74,14 +74,14 @@ graph TD
     end
 
     subgraph "RWAMP (extension project)"
-        RW1["rwamp-feature-session<br/>kill procedures, state machine"]
-        RW2["rwamp-feature-testament<br/>testament scheduling + lifecycle hooks"]
-        RW3["rwamp-feature-virtual<br/>virtual session manager"]
-        RW4["rwamp-feature-reflection<br/>procedure/topic/type introspection"]
-        RW5["rwamp-feature-statistics<br/>call + message counters"]
-        RW6["rwamp-feature-rerouting<br/>cross-realm call forwarding"]
-        RW7["rwamp-feature-registration<br/>pattern matching + revocation"]
-        RW8["rwamp-rest<br/>REST over WAMP bridge"]
+        RW1["rwamp-feature-session<br/>kill procedures, state machine<br/>✅ Phase 1"]
+        RW2["rwamp-feature-testament<br/>testament scheduling + lifecycle hooks<br/>⬜ Phase 2"]
+        RW3["rwamp-feature-virtual<br/>virtual session manager<br/>⬜ Phase 2"]
+        RW4["rwamp-feature-reflection<br/>procedure/topic/type introspection<br/>⬜ Phase 2"]
+        RW5["rwamp-feature-statistics<br/>call + message counters<br/>✅ Phase 1"]
+        RW6["rwamp-feature-rerouting<br/>cross-realm call forwarding<br/>⬜ Phase 3"]
+        RW7["rwamp-feature-registration<br/>pattern matching + revocation<br/>⬜ Phase 4"]
+        RW8["rwamp-rest<br/>REST over WAMP bridge<br/>⬜ Phase 3"]
     end
 
     RW1 --> LF1
@@ -99,47 +99,40 @@ graph TD
 
 All packages under `ssg.rwamp`:
 
-| Package | Purpose |
-|---------|---------|
-| `ssg.rwamp.feature.session` | Session kill procedures |
-| `ssg.rwamp.feature.testament` | Testament manager, add/flush procedures |
-| `ssg.rwamp.feature.virtual` | Virtual session manager |
-| `ssg.rwamp.feature.reflection` | Reflection registry, introspection |
-| `ssg.rwamp.feature.statistics` | Call and message statistics counters |
-| `ssg.rwamp.feature.rerouting` | Cross-realm call forwarding |
-| `ssg.rwamp.feature.registration` | Pattern-based registration, revocation |
-| `ssg.rwamp.rest` | REST over WAMP bridge |
+| Package | Purpose | Status |
+|---------|---------|--------|
+| `ssg.rwamp.feature.session` | Session kill procedures | ✅ Done |
+| `ssg.rwamp.feature.testament` | Testament manager, add/flush procedures | ⬜ Phase 2 |
+| `ssg.rwamp.feature.virtual` | Virtual session manager | ⬜ Phase 2 |
+| `ssg.rwamp.feature.reflection` | Reflection registry, introspection | ⬜ Phase 2 |
+| `ssg.rwamp.feature.statistics` | Call and message statistics counters | ✅ Done |
+| `ssg.rwamp.feature.rerouting` | Cross-realm call forwarding | ⬜ Phase 3 |
+| `ssg.rwamp.feature.registration` | Pattern-based registration, revocation | ⬜ Phase 4 |
+| `ssg.rwamp.rest` | REST over WAMP bridge | ⬜ Phase 3 |
 
 ---
 
-## 3. lego-flow Changes (Implemented)
+## 3. lego-flow Changes (Phase 0 — ✅ Complete)
 
-All 4 proposed changes have been implemented and committed to lego-flow.
-
-| # | Change | Status | lego-flow Commit |
-|---|--------|--------|-----------------|
-| 1 | `SessionState` enum in `WampSession` | ✅ Merged | `7505aac` |
-| 2 | `registerMetaProcedure()` in `WampRouter` | ✅ Merged | `7505aac` |
-| 3 | `setTimeoutExecutor()` in `Dealer` | ✅ Merged | `7505aac` |
-| 4 | `getActiveSessions()` in `Realm` | ✅ Merged | `7505aac` |
+All changes committed to lego-flow `master` as commit `7505aac` and merged.
 
 ### 3.1 SessionState Enum
 
-`WampSession` now uses `SessionState` enum (PENDING → ESTABLISHED → CLOSING → CLOSED)
-instead of boolean `established`. Backward-compatible `isEstablished()` preserved.
-New `getState()` accessor available.
+Replaced `boolean established` in `WampSession` with `SessionState` enum:
+PENDING → ESTABLISHED → CLOSING → CLOSED. Backward-compatible `isEstablished()`
+preserved. New `getState()` accessor.
 
 ### 3.2 Meta Procedure Registration
 
-`WampRouter.registerMetaProcedure(name, handler)` and `unregisterMetaProcedure(name)`
-allow external code to register custom meta procedures. Built-in procedures take
-precedence. Handler signature: `(WampMessage.Call, WampTransport) → List<Object>`.
+`WampRouter.registerMetaProcedure(name, handler)` and `unregisterMetaProcedure(name)`.
+`BiFunction<WampMessage.Call, WampTransport, List<Object>>` handler signature.
+Built-in procedures take precedence (checked via switch before custom handlers).
 
-### 3.3 Call Timeout in Dealer
+### 3.3 Call Timeout
 
 `Dealer.setTimeoutExecutor(ScheduledExecutorService)` enables optional call timeout
 enforcement. When a Call includes `timeout` option (seconds), the Dealer schedules a
-timer. On expiry, sends `wamp.error.timeout` to caller and INTERRUPT to callee.
+timer. On expiry: `wamp.error.timeout` to caller + INTERRUPT to callee.
 Progressive results handling preserved.
 
 ### 3.4 Active Sessions Accessor
@@ -149,7 +142,7 @@ Thread-safe copy, not live-linked to internal registry.
 
 ---
 
-## 4. Dependency Management (following MDB-SQL patterns)
+## 4. Dependency Management
 
 ### 4.1 Maven
 
@@ -157,12 +150,14 @@ Thread-safe copy, not live-linked to internal registry.
 - Each module depends on `ssg:lego-flow-wamp:${lego-flow.version}`
 - GitHub Packages repo: `https://maven.pkg.github.com/000ssg/lego-flow`
 - Credentials from `GITHUB_ACTOR` / `GITHUB_TOKEN` env vars
+- `mavenLocal()` for local development override
 
 ### 4.2 Gradle
 
-- `build.gradle.kts` references `property("legoFlowVersion")`
-- GitHub Packages repo with credentials from env vars
-- Uses `mavenLocal()` for local development override
+- `build.gradle.kts` with hardcoded `legoFlowVersion = "0.2.0-SNAPSHOT"`
+- GitHub Packages repo with `content { includeGroup("ssg") }` to avoid auth issues
+- `mavenLocal()` for local lego-flow override
+- `junitPlatformVersion = "1.11.4"` (separate from junitVersion)
 
 ### 4.3 Local Development
 
@@ -181,13 +176,13 @@ Both Maven and Gradle pick up from `~/.m2/repository`.
 
 Detailed per-phase plans with step-by-step implementation tracking:
 
-| Phase | Document | Status |
-|-------|----------|--------|
-| Phase 0 — lego-flow changes | Section 3 above | ✅ Complete |
-| Phase 1 — Foundation | [doc/plan/PHASE_1_Foundation.md](PHASE_1_Foundation.md) | ⬜ Pending |
-| Phase 2 — Discovery & Identity | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ⬜ Pending |
-| Phase 3 — Integration | [doc/plan/PHASE_3_Integration.md](PHASE_3_Integration.md) | ⬜ Pending |
-| Phase 4 — Polish | [doc/plan/PHASE_4_Polish.md](PHASE_4_Polish.md) | ⬜ Pending |
+| Phase | Document | Status | Tests |
+|-------|----------|--------|-------|
+| Phase 0 — lego-flow changes | Section 3 above | ✅ Complete | 21 tests (lego-flow) |
+| Phase 1 — Foundation | [doc/plan/PHASE_1_Foundation.md](PHASE_1_Foundation.md) | ✅ Complete | 24 tests |
+| Phase 2 — Discovery & Identity | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ⬜ Pending | — |
+| Phase 3 — Integration | [doc/plan/PHASE_3_Integration.md](PHASE_3_Integration.md) | ⬜ Pending | — |
+| Phase 4 — Polish | [doc/plan/PHASE_4_Polish.md](PHASE_4_Polish.md) | ⬜ Pending | — |
 
 ---
 
@@ -201,7 +196,7 @@ Detailed per-phase plans with step-by-step implementation tracking:
 | First commit with plan | ✅ Done |
 | Create AGENTS.md | ✅ Done |
 
-### lego-flow Changes
+### lego-flow Changes (Phase 0)
 | Step | Status |
 |------|--------|
 | SessionState enum in WampSession | ✅ Merged (commit 7505aac) |
@@ -212,11 +207,11 @@ Detailed per-phase plans with step-by-step implementation tracking:
 ### Phase 1 — Foundation
 | Milestone | Status |
 |-----------|--------|
-| Project scaffolding (POM, Gradle, dependency on lego-flow-wamp) | ⬜ Pending |
-| Session Meta API (kill procedures) | ⬜ Pending |
-| Statistics | ⬜ Pending |
-| Phase 1 tests | ⬜ Pending |
-| Phase 1 dual-build verification | ⬜ Pending |
+| Project scaffolding (POM, Gradle, dependency on lego-flow-wamp) | ✅ Done |
+| Session Meta API (kill procedures) | ✅ Done |
+| Statistics | ✅ Done |
+| Phase 1 tests | ✅ Done (24 tests) |
+| Phase 1 dual-build verification | ✅ Done (Maven + Gradle) |
 
 ### Phase 2 — Discovery & Identity
 | Milestone | Status |
@@ -249,7 +244,7 @@ Detailed per-phase plans with step-by-step implementation tracking:
 ## 7. Test Strategy
 
 ### Test Organization
-- **Feature tests** — one test class per feature provider, using `InMemoryTransport` from lego-flow
+- **Feature tests** — one test class per feature provider, using `InMemoryTransport`
 - **Integration tests** — end-to-end flows using WebSocket transport from lego-flow
 - **No duplicate tests for re-used components** — lego-flow tests cover the core
 
@@ -257,6 +252,7 @@ Detailed per-phase plans with step-by-step implementation tracking:
 - `InMemoryTransport.createPair()` — paired transports for isolated testing
 - AssertJ assertions — `assertThat(response).isInstanceOf(...)`
 - Tests import lego-flow WAMP classes directly
+- Each module has its own `InMemoryTransport` in test sources
 
 ---
 
@@ -284,12 +280,21 @@ Detailed per-phase plans with step-by-step implementation tracking:
 | Item | Days |
 |------|------|
 | Phase 0 — lego-flow changes | 2.25 |
-| Setup + scaffolding | 2 |
-| Phase 1 — Foundation (RWAMP) | 4 |
+| Phase 1 — Setup + Foundation | 4 |
 | Phase 2 — Discovery & Identity | 13 |
 | Phase 3 — Integration | 14 |
 | Phase 4 — Polish | 5 |
 | Buffer (15%) | 6 |
-| **Total** | **46.25** |
+| **Total** | **44.25** |
 
-**~46 working days (6-8 weeks at 1 person)**
+**~44 working days (6-8 weeks at 1 person)**
+
+### Cumulative Test Counts
+
+| Phase | Tests | Cumulative |
+|-------|-------|------------|
+| Phase 0 (lego-flow) | 21 | 21 |
+| Phase 1 (RWAMP) | 24 | 45 |
+| Phase 2 (planned) | 21+ | 66+ |
+| Phase 3 (planned) | 16+ | 82+ |
+| Phase 4 (planned) | 8+ | 90+ |

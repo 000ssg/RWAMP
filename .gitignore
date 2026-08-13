@@ -1,0 +1,21 @@
+# Build output
+target/
+build/
+.gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.swp
+*~
