@@ -6,7 +6,6 @@ import ssg.legoflow.wamp.core.realm.RealmManager;
 import ssg.legoflow.wamp.core.router.WampRouter;
 import ssg.legoflow.wamp.core.transport.WampTransport;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +69,40 @@ class CallReroutingTest {
         assertThat(result).isInstanceOf(WampMessage.Result.class);
         var body = (Map<String, Object>) ((WampMessage.Result) result).args().get(0);
         assertThat((String) body.get("error")).contains("no_such_procedure");
+    }
+
+    @Test
+    void rerouteApi_success_withRegisteredProcedure() {
+        var realm2 = realmManager.getRealm("realm2").orElseThrow();
+        var realm2Dealer = realm2.getDealer();
+        var calleeTransport = new ResultTransport();
+        realm2Dealer.handleRegister(new WampMessage.Register(1L, Map.of(), "com.example.add"),
+                calleeTransport);
+
+        var reroute = new LinkedHashMap<String, Object>();
+        reroute.put("realm", "realm2");
+        reroute.put("procedure", "com.example.add");
+        var options = new LinkedHashMap<String, Object>();
+        options.put("reroute", reroute);
+
+        var call = new WampMessage.Call(1, options, "wamp.reroute.call", List.of(3, 4));
+        var result = route(call);
+
+        assertThat(result).isInstanceOf(WampMessage.Result.class);
+        var body = (Map<String, Object>) ((WampMessage.Result) result).args().get(0);
+        assertThat(body).containsEntry("target_realm", "realm2");
+        assertThat(body).containsEntry("target_procedure", "com.example.add");
+    }
+
+    @Test
+    void rerouteApi_unregister() {
+        ReroutingApi.unregister(router);
+
+        var call = new WampMessage.Call(2, Map.of(), "wamp.reroute.call", List.of());
+        var result = route(call);
+
+        assertThat(result).isInstanceOf(WampMessage.Error.class);
+        assertThat(((WampMessage.Error) result).error()).isEqualTo("wamp.error.no_such_procedure");
     }
 
     @Test

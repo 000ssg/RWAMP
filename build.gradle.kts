@@ -12,6 +12,7 @@ val junitPlatformVersion = "1.11.4"
 val assertjVersion = "3.27.3"
 val slf4jVersion = "2.0.16"
 val legoFlowVersion = "0.2.0-SNAPSHOT"
+val jacocoAgentVersion = "0.8.14"
 
 repositories {
     mavenLocal()
@@ -82,6 +83,95 @@ subprojects {
         "testImplementation"("org.assertj:assertj-core:$assertjVersion")
         "testRuntimeOnly"("org.junit.platform:junit-platform-launcher:$junitPlatformVersion")
     }
+}
+
+// ── JaCoCo Agent Configuration ─────────────────────────────────────
+// Gradle 9.x removed the built-in jacoco plugin.
+// Adds -javaagent to all test tasks so .exec files are generated during testing.
+
+val jacocoAgent = configurations.create("jacocoAgent") {
+    isTransitive = false
+}
+dependencies.add(jacocoAgent.name, "org.jacoco:org.jacoco.agent:$jacocoAgentVersion:runtime")
+
+subprojects.forEach { subproject ->
+    if (subproject.plugins.hasPlugin("java-library") || subproject.plugins.hasPlugin("java")) {
+        subproject.tasks.withType<Test> {
+            val agentJar = jacocoAgent.files.firstOrNull()
+            if (agentJar != null) {
+                val destFile = subproject.layout.buildDirectory.get().asFile
+                    .resolve("jacoco/test.exec")
+                jvmArgs("-javaagent:${agentJar.absolutePath}=includes=ssg.rwamp.**,output=file,destfile=${destFile}")
+            }
+        }
+    }
+}
+
+// ── JaCoCo Aggregate Report ──────────────────────────────────────
+// Produces HTML + XML reports from all subprojects' .exec files.
+// Run: ./gradlew clean test jacocoAggregateReport --no-daemon
+
+tasks.register("jacocoAggregateReport", JacocoAggregateReportTask::class) {
+    val execDirPaths = subprojects
+        .filter { it.plugins.hasPlugin("java-library") || it.plugins.hasPlugin("java") }
+        .map { it.layout.buildDirectory.get().asFile.resolve("jacoco").absolutePath }
+    
+    setExecDirPaths(execDirPaths.toList())
+    outputDir = layout.buildDirectory.dir("jacoco/aggregate").get().asFile
+    
+    outputs.upToDateWhen { false }
+    
+    subprojects.forEach { subproject ->
+        if (subproject.plugins.hasPlugin("java-library") || subproject.plugins.hasPlugin("java")) {
+            dependsOn(subproject.tasks.named("test"))
+        }
+    }
+}
+
+// ── JaCoCo Coverage Verification ──────────────────────────────────────
+// Per-subproject: 50% minimum. Aggregate: 80% minimum.
+// Run: ./gradlew jacocoTestCoverageVerification --no-daemon
+
+subprojects.forEach { subproject ->
+    if (subproject.plugins.hasPlugin("java-library") || subproject.plugins.hasPlugin("java")) {
+        subproject.tasks.register("jacocoTestCoverageVerification", JacocoCoverageVerificationTask::class.java) {
+            execFile = subproject.layout.buildDirectory.get().asFile.resolve("jacoco/test.exec")
+            classesDir = subproject.layout.buildDirectory.get().asFile.resolve("classes/java/main")
+            minCoverage = 0.50
+            dependsOn(subproject.tasks.named("test"))
+        }
+    }
+}
+
+// Aggregate coverage verification across all modules
+tasks.register("jacocoAggregateVerification", JacocoAggregateVerificationTask::class) {
+    val execDirPaths = subprojects
+        .filter { it.plugins.hasPlugin("java-library") || it.plugins.hasPlugin("java") }
+        .map { it.layout.buildDirectory.get().asFile.resolve("jacoco").absolutePath }
+    val classDirPaths = subprojects
+        .filter { it.plugins.hasPlugin("java-library") || it.plugins.hasPlugin("java") }
+        .map { it.layout.buildDirectory.get().asFile.resolve("classes/java/main").absolutePath }
+    
+    setExecDirPaths(execDirPaths.toList())
+    setClassDirPaths(classDirPaths.toList())
+    minCoverage = 0.80
+    
+    subprojects.forEach { subproject ->
+        if (subproject.plugins.hasPlugin("java-library") || subproject.plugins.hasPlugin("java")) {
+            dependsOn(subproject.tasks.named("test"))
+        }
+    }
+}
+
+tasks.register("jacocoTestCoverageVerification") {
+    group = "verification"
+    description = "Verify JaCoCo coverage for all subprojects"
+    subprojects.forEach { subproject ->
+        if (subproject.plugins.hasPlugin("java-library") || subproject.plugins.hasPlugin("java")) {
+            dependsOn(subproject.tasks.named("jacocoTestCoverageVerification"))
+        }
+    }
+    dependsOn(tasks.named("jacocoAggregateVerification"))
 }
 
 // ── Maven Publish ──
