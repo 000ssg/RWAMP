@@ -221,8 +221,8 @@ Detailed per-phase plans with step-by-step implementation tracking:
 ### Repository Setup
 | Step | Status |
 |------|--------|
-| Create `prototype` branch from `master` | ⬜ Pending |
-| Write plan documents (this set) | ⬜ Pending |
+| Create `prototype` branch from `master` | ✅ Done |
+| Write plan documents (this set) | ✅ Done |
 | First commit (plan) | ⬜ Pending |
 
 ### Phase 1 — Foundation
