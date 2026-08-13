@@ -21,7 +21,7 @@ WAMP implementations (xLib/Autobahn):
 | Reflection API (`wamp.reflection.*`) | `rwamp-feature-reflection` | ✅ Phase 2 |
 | REST over WAMP | `rwamp-rest` | ✅ Phase 3 |
 | Call rerouting | `rwamp-feature-rerouting` | ✅ Phase 3 |
-| Pattern registration | `rwamp-feature-registration` | ⬜ Phase 4 |
+| Pattern registration | `rwamp-feature-registration` | ✅ Phase 4 |
 
 ## Architecture
 
@@ -47,8 +47,8 @@ graph TD
         RR["rwamp-feature-rerouting<br/>cross-realm RPC forwarding"]
     end
 
-    subgraph "RWAMP Phase 4 ⬜"
-        RG["rwamp-feature-registration<br/>pattern matching"]
+    subgraph "RWAMP Phase 4 ✅"
+        RG["rwamp-feature-registration<br/>pattern matching, revocation"]
     end
 
     S --> LF
@@ -98,14 +98,15 @@ GitHub Packages (with `GITHUB_ACTOR`/`GITHUB_TOKEN`).
 
 | Module | Package | Purpose | Tests |
 |--------|---------|---------|-------|
-| `rwamp-feature-session` | `ssg.rwamp.feature.session` | Session kill procedures | 9 |
-| `rwamp-feature-statistics` | `ssg.rwamp.feature.statistics` | Statistics counters | 10 |
+| `rwamp-feature-session` | `ssg.rwamp.feature.session` | Session kill procedures | 12 |
+| `rwamp-feature-statistics` | `ssg.rwamp.feature.statistics` | Statistics counters | 12 |
 | `rwamp-feature-testament` | `ssg.rwamp.feature.testament` | Testament scheduling | 6 |
 | `rwamp-feature-virtual` | `ssg.rwamp.feature.virtual` | Virtual session manager | 6 |
 | `rwamp-feature-reflection` | `ssg.rwamp.feature.reflection` | Introspection API | 7 |
 | `rwamp-rest` | `ssg.rwamp.rest` | REST over WAMP bridge | 10 |
 | `rwamp-feature-rerouting` | `ssg.rwamp.feature.rerouting` | Cross-realm forwarding | 7 |
-| **Total** | | | **55** |
+| `rwamp-feature-registration` | `ssg.rwamp.feature.registration` | Pattern registration & revocation | 31 |
+| **Total** | | | **92** |
 
 ## Quick Start
 
@@ -172,6 +173,34 @@ reroute.put("realm", "realm2");
 reroute.put("procedure", "com.example.add");
 var options = new LinkedHashMap<String, Object>();
 options.put("reroute", reroute);
+```
+
+### Pattern Registration
+
+```java
+var interceptor = new RegistrationInterceptor();
+var router = new WampRouter();
+interceptor.registerMetaProcedures(router);
+
+// In your message loop, intercept before routing:
+WampMessage response = interceptor.intercept(msg, transport);
+if (response != null) {
+    transport.send(response);
+} else {
+    router.route(msg, transport);
+}
+
+// Register a prefix pattern
+interceptor.intercept(new WampMessage.Register(1,
+        Map.of("match", "prefix"), "com.example."), calleeTransport);
+
+// Register a wildcard pattern
+interceptor.intercept(new WampMessage.Register(2,
+        Map.of("match", "wildcard"), "com.*.bar"), calleeTransport);
+
+// Revoke a registration
+router.route(new WampMessage.Call(3, Map.of(), "wamp.registration.revoke",
+        List.of(regId)), callerTransport);
 ```
 
 ## Development

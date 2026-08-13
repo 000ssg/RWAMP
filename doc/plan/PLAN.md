@@ -2,7 +2,7 @@
 
 **Project:** RWAMP — Extended WAMP v2 implementation for Java 25+
 **Date:** 2026-08-13
-**Status: In Progress (Phase 1, 2, 3 complete)**
+**Status: Complete (Phases 1-4)**
 
 ---
 
@@ -63,7 +63,7 @@ upstream in lego-flow (see Section 3).
 | Statistics tracking | xLib `WAMPStatistics` | `rwamp-feature-statistics` | ✅ Done |
 | REST over WAMP bridge | xLib `REST_WAMP_MethodsProvider` | `rwamp-rest` | ✅ Phase 3 | |
 | Call rerouting | xLib `WAMPRPCDealer` rerouting | `rwamp-feature-rerouting` | ✅ Phase 3 | |
-| Pattern-based registration | xLib `WAMPRPCDealer` pattern | `rwamp-feature-registration` | ⬜ Phase 4 |
+| Pattern-based registration | xLib `WAMPRPCDealer` pattern | `rwamp-feature-registration` | ✅ Phase 4 |
 
 ### 2.3 Module Structure
 
@@ -75,13 +75,13 @@ graph TD
 
     subgraph "RWAMP (extension project)"
         RW1["rwamp-feature-session<br/>kill procedures, state machine<br/>✅ Phase 1"]
-        RW2["rwamp-feature-testament<br/>testament scheduling + lifecycle hooks<br/>⬜ Phase 2"]
-        RW3["rwamp-feature-virtual<br/>virtual session manager<br/>⬜ Phase 2"]
-        RW4["rwamp-feature-reflection<br/>procedure/topic/type introspection<br/>⬜ Phase 2"]
+        RW2["rwamp-feature-testament<br/>testament scheduling + lifecycle hooks<br/>✅ Phase 2"]
+        RW3["rwamp-feature-virtual<br/>virtual session manager<br/>✅ Phase 2"]
+        RW4["rwamp-feature-reflection<br/>procedure/topic/type introspection<br/>✅ Phase 2"]
         RW5["rwamp-feature-statistics<br/>call + message counters<br/>✅ Phase 1"]
-        RW6["rwamp-feature-rerouting<br/>cross-realm call forwarding<br/>⬜ Phase 3"]
-        RW7["rwamp-feature-registration<br/>pattern matching + revocation<br/>⬜ Phase 4"]
-        RW8["rwamp-rest<br/>REST over WAMP bridge<br/>⬜ Phase 3"]
+        RW6["rwamp-feature-rerouting<br/>cross-realm call forwarding<br/>✅ Phase 3"]
+        RW7["rwamp-feature-registration<br/>pattern matching + revocation<br/>✅ Phase 4"]
+        RW8["rwamp-rest<br/>REST over WAMP bridge<br/>✅ Phase 3"]
     end
 
     RW1 --> LF1
@@ -102,12 +102,12 @@ All packages under `ssg.rwamp`:
 | Package | Purpose | Status |
 |---------|---------|--------|
 | `ssg.rwamp.feature.session` | Session kill procedures | ✅ Done |
-| `ssg.rwamp.feature.testament` | Testament manager, add/flush procedures | ⬜ Phase 2 |
-| `ssg.rwamp.feature.virtual` | Virtual session manager | ⬜ Phase 2 |
-| `ssg.rwamp.feature.reflection` | Reflection registry, introspection | ⬜ Phase 2 |
+| `ssg.rwamp.feature.testament` | Testament manager, add/flush procedures | ✅ Phase 2 |
+| `ssg.rwamp.feature.virtual` | Virtual session manager | ✅ Phase 2 |
+| `ssg.rwamp.feature.reflection` | Reflection registry, introspection | ✅ Phase 2 |
 | `ssg.rwamp.feature.statistics` | Call and message statistics counters | ✅ Done |
-| `ssg.rwamp.feature.rerouting` | Cross-realm call forwarding | ⬜ Phase 3 |
-| `ssg.rwamp.feature.registration` | Pattern-based registration, revocation | ⬜ Phase 4 |
+| `ssg.rwamp.feature.rerouting` | Cross-realm call forwarding | ✅ Phase 3 |
+| `ssg.rwamp.feature.registration` | Pattern-based registration, revocation | ✅ Phase 4 |
 | `ssg.rwamp.rest` | REST over WAMP bridge | xLib `REST_WAMP_MethodsProvider` | `rwamp-rest` | ✅ Phase 3 | |
 
 ---
@@ -180,9 +180,9 @@ Detailed per-phase plans with step-by-step implementation tracking:
 |-------|----------|--------|-------|
 | Phase 0 — lego-flow changes | Section 3 above | ✅ Complete | 21 tests (lego-flow) |
 | Phase 1 — Foundation | [doc/plan/PHASE_1_Foundation.md](PHASE_1_Foundation.md) | ✅ Complete | 24 tests |
-| Phase 2 — Discovery | Phase 2 — Discovery & Identity | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ⬜ Pending | — Identity | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ✅ Complete | 19 tests | |
+| Phase 2 — Discovery | Phase 2 — Discovery & Identity | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ✅ Complete | 19 tests | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ✅ Complete | 19 tests | |
 | Phase 3 — Integration | [doc/plan/PHASE_3_Integration.md](PHASE_3_Integration.md) | ✅ Complete | 17 tests | |
-| Phase 4 — Polish | [doc/plan/PHASE_4_Polish.md](PHASE_4_Polish.md) | ⬜ Pending | — |
+| Phase 4 — Polish | [doc/plan/PHASE_4_Polish.md](PHASE_4_Polish.md) | ✅ Complete | 31 |
 
 ---
 
@@ -233,11 +233,11 @@ Detailed per-phase plans with step-by-step implementation tracking:
 ### Phase 4 — Polish
 | Milestone | Status |
 |-----------|--------|
-| Pattern-based registration | ⬜ Pending |
-| Registration revocation/meta | ⬜ Pending |
-| Phase 4 tests | ⬜ Pending |
-| Phase 4 dual-build verification | ⬜ Pending |
-| Final documentation | ⬜ Pending |
+| Pattern-based registration | ✅ Done |
+| Registration revocation/meta | ✅ Done |
+| Phase 4 tests | ✅ Done |
+| Phase 4 dual-build verification | ✅ Done |
+| Final documentation | ✅ Done |
 
 ---
 
@@ -297,4 +297,4 @@ Detailed per-phase plans with step-by-step implementation tracking:
 | Phase 1 (RWAMP) | 19 | 40 | |
 | Phase 2 (RWAMP) | 19 | 59 |+ |
 | Phase 3 (RWAMP) | 17 | 76 |+ |
-| Phase 4 (planned) | 8+ | 90+ |
+| Phase 4 (RWAMP) | 31 | 92 |

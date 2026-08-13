@@ -21,6 +21,7 @@
         <module>rwamp-feature-virtual</module>
         <module>rwamp-feature-rerouting</module>
         <module>rwamp-rest</module>
+        <module>rwamp-feature-registration</module>
     </modules>
 
     <properties>
@@ -69,6 +70,10 @@
             <dependency>
                 <groupId>ssg</groupId>
                 <artifactId>rwamp-feature-rerouting</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-registration</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Common -->
