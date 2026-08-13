@@ -1,293 +1,174 @@
 # Phase 1 — Foundation
 
-**RWAMP Phase 1:** Session Meta API, Call Timeout, Statistics, Session State Machine
-**Effort:** 6 days (+ 2 days scaffolding)
-**Dependencies:** None
+**RWAMP Phase 1:** Project scaffolding, Session Meta API (kill), Call Timeout, Statistics
+**Effort:** 5 days (+ 2 days scaffolding)
+**Dependencies:** lego-flow WAMP changes (pending approval)
 
 ---
 
 ## 1. Goals
 
 After Phase 1, RWAMP has:
-- A working Maven + Gradle project structure
-- Core protocol module with messages, session, serialization, transport
-- Router module with Broker, Dealer, Realm, RealmManager
-- Client module with all four roles
-- Session state machine (4 states)
-- Session Meta API including kill procedures
-- Call timeout enforcement in Dealer
-- Basic statistics tracking
+- A working Maven + Gradle project depending on `ssg:lego-flow-wamp`
+- Session Meta API kill procedures (on top of lego-flow's WampRouter)
+- Call timeout enforcement (on top of lego-flow's Dealer)
+- Basic statistics tracking (on top of lego-flow's Broker + Dealer)
+- Comprehensive test coverage for all Phase 1 features
 
 ---
 
 ## 2. Project Scaffolding
 
-### Step 1.1: Repository Setup
+### Step 2.1: Repository Setup
 | Task | Status |
 |------|--------|
-| Create `prototype` branch from `master` | ⬜ Pending |
-| Create `doc/plan/` directory structure | ⬜ Pending |
-| Write plan documents | ⬜ Pending |
-| First commit with plan on `prototype` | ⬜ Pending |
+| Create `prototype` branch from `master` | ✅ Done |
+| Write plan documents | ✅ Done |
+| First commit with plan | ✅ Done |
 
-### Step 1.2: Root POM + Gradle Settings
+### Step 2.2: Root POM + Gradle Settings
 | Task | Status |
 |------|--------|
-| Root `pom.xml` — groupId `ssg`, aggregator with all modules | ⬜ Pending |
+| Root `pom.xml` — groupId `ssg`, aggregator, **depends on lego-flow-wamp** | ⬜ Pending |
 | `settings.gradle.kts` — project names, module mapping | ⬜ Pending |
-| Root `build.gradle.kts` — Java 25, test conventions | ⬜ Pending |
-| Shared dependency management (JUnit 5, AssertJ, Mockito, SLF4J) | ⬜ Pending |
+| Root `build.gradle.kts` — Java 25, test conventions, lego-flow dependency | ⬜ Pending |
+| Shared dependency management (JUnit 5, AssertJ, Mockito, SLF4J, lego-flow-wamp) | ⬜ Pending |
 | Verify: `mvn clean compile -DskipTests` | ⬜ Pending |
 | Verify: `./gradlew clean classes` | ⬜ Pending |
 
-### Step 1.3: AGENTS.md
+**Note:** `lego-flow-wamp` is the only external WAMP dependency. All RWAMP modules
+depend on it transitively through the root POM.
+
+### Step 2.3: AGENTS.md
 | Task | Status |
 |------|--------|
 | Adapt from lego-flow AGENTS.md for RWAMP | ⬜ Pending |
-| Adjust module names, build commands | ⬜ Pending |
-| Document CI YAML bug (lego-flow experience) | ⬜ Pending |
+| Document dependency on lego-flow-wamp | ⬜ Pending |
+| Document CI YAML bug (from lego-flow experience) | ⬜ Pending |
 | Document dual-build verification protocol | ⬜ Pending |
 
-### Step 1.4: README.md
+### Step 2.4: README.md
 | Task | Status |
 |------|--------|
-| Project overview, architecture diagram (Mermaid) | ⬜ Pending |
+| Project overview — "RWAMP extends lego-flow's WAMP" | ⬜ Pending |
+| Architecture diagram (Mermaid) — show lego-flow as dependency | ⬜ Pending |
 | Module table with descriptions | ⬜ Pending |
-| Quick start instructions | ⬜ Pending |
 | Build instructions (Maven + Gradle) | ⬜ Pending |
 
 ---
 
-## 3. rwamp-core Module
+## 3. RWAMP Feature Modules (Phase 1)
 
-**Package:** `ssg.rwamp.core`
+**All modules depend on `ssg:lego-flow-wamp`.** No WAMP core classes are re-created.
 
-### Step 3.1: WampMessage (sealed interface)
+### Step 3.1: rwamp-feature-session — Kill Procedures
+
+**Package:** `ssg.rwamp.feature.session`
+
+Re-uses lego-flow's `WampRouter` and `Realm`. Adds kill procedures as
+meta procedure handlers registered with WampRouter.
+
 | Task | Status |
 |------|--------|
-| `WampMessageType` enum with all 20+ message types and code mapping | ⬜ Pending |
-| `WampMessage` sealed interface with `type()` method | ⬜ Pending |
-| Session records: `Hello`, `Welcome`, `Abort`, `Goodbye` | ⬜ Pending |
-| Auth records: `Challenge`, `Authenticate` | ⬜ Pending |
-| Error record: `Error` | ⬜ Pending |
-| Pub/Sub records: `Publish`, `Published`, `Subscribe`, `Subscribed`, `Unsubscribe`, `Unsubscribed`, `Event` | ⬜ Pending |
-| RPC records: `Call`, `Cancel`, `Result`, `Register`, `Registered`, `Unregister`, `Unregistered`, `Invocation`, `Interrupt`, `Yield` | ⬜ Pending |
-| Test: `WampMessageTypeTest` — verify all codes unique | ⬜ Pending |
-| Test: `WampMessageTest` — verify all records implement sealed interface | ⬜ Pending |
-
-**Reference:** `lego-flow WampMessage.java` — direct pattern, use same record structure
-
-### Step 3.2: WampSession with State Machine
-| Task | Status |
-|------|--------|
-| `WampSessionState` enum: `OPENING`, `ESTABLISHED`, `CLOSING`, `CLOSED` | ⬜ Pending |
-| `WampSession` class with state transitions | ⬜ Pending |
-| Session properties: id, realm, authId, authRole, authMethod, state | ⬜ Pending |
-| Subscription/registration tracking (ConcurrentHashMap) | ⬜ Pending |
-| Lifecycle methods: `establish()`, `close()`, `setState()` | ⬜ Pending |
-| State transition validation (illegal transitions throw exception) | ⬜ Pending |
-| Test: `WampSessionTest` — state transitions | ⬜ Pending |
-| Test: `WampSessionTest` — subscription/registration tracking | ⬜ Pending |
-
-**Reference:** xLib `WAMPSessionState.java` + `WAMPSessionImpl.java` for state machine logic
-
-### Step 3.3: Serialization
-| Task | Status |
-|------|--------|
-| `WampSerializer` interface: `encode()`, `decode()` | ⬜ Pending |
-| JSON serializer (Jackson) | ⬜ Pending |
-| MessagePack serializer | ⬜ Pending |
-| CBOR serializer | ⬜ Pending |
-| `WampSerializerFactory` — factory by serialization ID | ⬜ Pending |
-| Test: `WampSerializerTest` — JSON round-trip | ⬜ Pending |
-| Test: `WampSerializerTest` — MessagePack round-trip | ⬜ Pending |
-| Test: `WampSerializerTest` — CBOR round-trip | ⬜ Pending |
-| Test: `WampSerializerFactoryTest` — factory lookup | ⬜ Pending |
-
-**Reference:** lego-flow `serialization/` package — adapt CBOR and MessagePack
-
-### Step 3.4: Transport Interface
-| Task | Status |
-|------|--------|
-| `WampTransport` interface: `send()`, `close()` | ⬜ Pending |
-| `InMemoryTransport` implementation for testing (pair-based) | ⬜ Pending |
-| Test: `InMemoryTransportTest` — pair communication | ⬜ Pending |
-
-**Reference:** lego-flow `InMemoryTransport.java`
-
----
-
-## 4. rwamp-router Module
-
-**Package:** `ssg.rwamp.router`
-
-### Step 4.1: Broker
-| Task | Status |
-|------|--------|
-| `Broker` class with exact, prefix, wildcard subscriptions | ⬜ Pending |
-| `handleSubscribe()` with match policy support | ⬜ Pending |
-| `handleUnsubscribe()` | ⬜ Pending |
-| `handlePublish()` with exclude_me, disclose_me, exclude, eligible, retain | ⬜ Pending |
-| Event retention (retained events per topic) | ⬜ Pending |
-| Test: `BrokerTest` — basic subscribe/publish | ⬜ Pending |
-| Test: `AdvancedBrokerTest` — pattern matching, exclusion, eligibility | ⬜ Pending |
-| Test: `EventRetentionTest` — retained event delivery | ⬜ Pending |
-
-**Reference:** lego-flow `Broker.java` — direct adaptation
-
-### Step 4.2: Dealer
-| Task | Status |
-|------|--------|
-| `Dealer` class with registration management | ⬜ Pending |
-| `handleRegister()` with invoke policy (single, first, last, roundrobin, random) | ⬜ Pending |
-| `handleUnregister()` | ⬜ Pending |
-| `handleCall()` with disclose_me, receive_progress | ⬜ Pending |
-| `handleYield()` — result delivery | ⬜ Pending |
-| `handleCancel()` — skip, kill, killnowait | ⬜ Pending |
-| Test: `DealerTest` — basic register/call | ⬜ Pending |
-| Test: `AdvancedDealerTest` — shared registrations, progressive results, cancellation | ⬜ Pending |
-
-**Reference:** lego-flow `Dealer.java` — direct adaptation
-
-### Step 4.3: Realm + RealmManager
-| Task | Status |
-|------|--------|
-| `Realm` with embedded Broker, Dealer, session map, session ID counter | ⬜ Pending |
-| `RealmManager` with create, get, remove, list realms | ⬜ Pending |
-| Test: `RealmTest` — session management | ⬜ Pending |
-| Test: `RealmManagerTest` — multi-realm operations | ⬜ Pending |
-
-**Reference:** lego-flow `Realm.java`, `RealmManager.java`
-
-### Step 4.4: Session Meta API (Kill Procedures)
-| Task | Status |
-|------|--------|
-| `wamp.session.count` — session count | ⬜ Pending |
-| `wamp.session.list` — list session IDs | ⬜ Pending |
-| `wamp.session.get` — get session details | ⬜ Pending |
-| `wamp.session.kill` — kill by session ID | ⬜ Pending |
-| `wamp.session.kill_by_authid` — kill by auth ID | ⬜ Pending |
-| `wamp.session.kill_by_authrole` — kill by auth role | ⬜ Pending |
+| `SessionMetaKillHandler` class — implements kill procedures | ⬜ Pending |
+| `wamp.session.kill` — kill by session ID, sends GOODBYE | ⬜ Pending |
+| `wamp.session.kill_by_authid` — kill all matching authid | ⬜ Pending |
+| `wamp.session.kill_by_authrole` — kill all matching authrole | ⬜ Pending |
 | `wamp.session.kill_all` — kill all sessions | ⬜ Pending |
-| `wamp.session.on_join` — publish on session join | ⬜ Pending |
-| `wamp.session.on_leave` — publish on session leave | ⬜ Pending |
-| Test: `SessionMetaAPITest` — count, list, get | ⬜ Pending |
-| Test: `SessionMetaKillTest` — kill, kill_by_authid, kill_by_authrole, kill_all | ⬜ Pending |
+| Registration with WampRouter (uses proposed meta procedure registration) | ⬜ Pending |
+| **Fallback:** if lego-flow changes not approved, `SessionMetaRouter` wraps `WampRouter.route()` | ⬜ Pending |
+| Test: `SessionMetaKillTest` — kill by session ID | ⬜ Pending |
+| Test: `SessionMetaKillTest` — kill by authid | ⬜ Pending |
+| Test: `SessionMetaKillTest` — kill by authrole | ⬜ Pending |
+| Test: `SessionMetaKillTest` — kill_all | ⬜ Pending |
+| Test: `SessionMetaKillTest` — no_such_session error | ⬜ Pending |
 
-**Reference:** xLib `WAMP_FP_SessionMetaAPI.java` — implement as local procedures in Dealer
+**Reference:** xLib `WAMP_FP_SessionMetaAPI.java` (procedure logic only)
 
-### Step 4.5: Call Timeout
+**Key design decision:** Kill procedures are registered as meta procedure handlers.
+If lego-flow's meta procedure registration is not approved, RWAMP provides a
+`SessionMetaRouter` subclass that extends `WampRouter.route()` to intercept kill calls.
+
+### Step 3.2: rwamp-feature-statistics — Statistics Tracking
+
+**Package:** `ssg.rwamp.feature.statistics`
+
+Re-uses lego-flow's `Broker` and `Dealer`. Wraps or hooks into message processing
+to collect statistics.
+
 | Task | Status |
 |------|--------|
-| `ScheduledExecutorService` for timeout tracking in Dealer | ⬜ Pending |
-| `timeout` option from CALL options | ⬜ Pending |
-| Send INTERRUPT to callee on timeout | ⬜ Pending |
-| Return ERROR to caller on timeout | ⬜ Pending |
-| Cancel timeout on normal yield | ⬜ Pending |
-| Test: `CallTimeoutTest` — timeout triggers INTERRUPT | ⬜ Pending |
-| Test: `CallTimeoutTest` — no timeout when callee responds in time | ⬜ Pending |
-
-**Reference:** xLib `WAMPRPCDealer.java` timeout handling
-
-### Step 4.6: Statistics
-| Task | Status |
-|------|--------|
-| `WampStatistics` — aggregate statistics holder | ⬜ Pending |
-| `CallStatistics` — call count, success, error, timeout, avg latency | ⬜ Pending |
-| `MessageStatistics` — per-message-type counters | ⬜ Pending |
-| Hook statistics into Broker (publish counts) | ⬜ Pending |
-| Hook statistics into Dealer (call counts, latency) | ⬜ Pending |
-| Test: `CallStatisticsTest` — verify counters | ⬜ Pending |
-| Test: `MessageStatisticsTest` — verify per-type counters | ⬜ Pending |
+| `WampStatistics` — aggregate statistics holder (call + message counters) | ⬜ Pending |
+| `CallStatistics` — call count, success, error, timeout, avg latency (record) | ⬜ Pending |
+| `MessageStatistics` — per-message-type counters (record) | ⬜ Pending |
+| `StatisticsRouter` — wraps WampRouter, counts messages routed | ⬜ Pending |
+| `StatisticsBroker` — wraps Broker, counts publishes/subscribes | ⬜ Pending |
+| `StatisticsDealer` — wraps Dealer, counts calls/invocations/yields | ⬜ Pending |
+| `StatisticsProvider` — convenience class that wraps router + broker + dealer | ⬜ Pending |
+| Test: `CallStatisticsTest` — call counts after operations | ⬜ Pending |
+| Test: `MessageStatisticsTest` — per-type counters after operations | ⬜ Pending |
+| Test: `StatisticsIntegrationTest` — end-to-end with wrapper | ⬜ Pending |
 
 **Reference:** xLib `WAMPStatistics.java`, `WAMPCallStatistics.java`, `WAMPMessageStatistics.java`
 
----
+**Key design decision:** Statistics uses a decorator/wrapper pattern around lego-flow's
+Broker and Dealer. No changes to lego-flow needed — pure RWAMP composition.
 
-## 5. rwamp-client Module
+### Step 3.3: Call Timeout
 
-**Package:** `ssg.rwamp.client`
+**Package:** `ssg.rwamp.feature.timeout`
 
-### Step 5.1: Caller
 | Task | Status |
 |------|--------|
-| `Caller` with `call()` returning `CompletableFuture` | ⬜ Pending |
-| `call()` with options (disclose_me, receive_progress, timeout) | ⬜ Pending |
-| `cancel()` — cancel pending calls | ⬜ Pending |
-| Result/error handling via pending calls map | ⬜ Pending |
-| Test: `CallerTest` — basic call, result, error | ⬜ Pending |
-| Test: `CallerTest` — progressive results | ⬜ Pending |
+| `TimeoutDealer` — wraps lego-flow's `Dealer`, adds timeout tracking | ⬜ Pending |
+| `timeout` option from CALL options parsed and applied | ⬜ Pending |
+| `ScheduledExecutorService`-based timeout scheduling | ⬜ Pending |
+| On timeout: send INTERRUPT to callee, return ERROR to caller | ⬜ Pending |
+| Cancel timeout on normal yield (handler intercepts YIELD) | ⬜ Pending |
+| **Fallback:** if lego-flow Dealer timeout change approved, `TimeoutDealer` delegates | ⬜ Pending |
+| Test: `CallTimeoutTest` — timeout triggers INTERRUPT | ⬜ Pending |
+| Test: `CallTimeoutTest` — no timeout when callee responds in time | ⬜ Pending |
+| Test: `CallTimeoutTest` — timeout option absent → no timeout | ⬜ Pending |
 
-**Reference:** lego-flow `Caller.java`
+**Reference:** xLib `WAMPRPCDealer.java` timeout handling
 
-### Step 5.2: Callee
-| Task | Status |
-|------|--------|
-| `Callee` with `register()` returning `CompletableFuture` | ⬜ Pending |
-| `unregister()` | ⬜ Pending |
-| Invocation handler (functional interface or callback) | ⬜ Pending |
-| Yield result / error | ⬜ Pending |
-| Test: `CalleeTest` — register, invoke, yield | ⬜ Pending |
-
-**Reference:** lego-flow `Callee.java`
-
-### Step 5.3: Publisher
-| Task | Status |
-|------|--------|
-| `Publisher` with `publish()` | ⬜ Pending |
-| Options: exclude_me, disclose_me, retain | ⬜ Pending |
-| Test: `PublisherTest` — basic publish | ⬜ Pending |
-
-**Reference:** lego-flow `Publisher.java`
-
-### Step 5.4: Subscriber
-| Task | Status |
-|------|--------|
-| `Subscriber` with `subscribe()` returning subscription ID | ⬜ Pending |
-| `unsubscribe()` | ⬜ Pending |
-| Event handler (Consumer) | ⬜ Pending |
-| Test: `SubscriberTest` — subscribe, receive events | ⬜ Pending |
-
-**Reference:** lego-flow `Subscriber.java`
-
-### Step 5.5: WampClient
-| Task | Status |
-|------|--------|
-| `WampClient` — entry point combining all roles + transport + session lifecycle | ⬜ Pending |
-| Session lifecycle: `connect()`, `join()`, `leave()`, `close()` | ⬜ Pending |
-| Auth method configuration | ⬜ Pending |
-| Test: `WampClientTest` — full lifecycle | ⬜ Pending |
+**Key design decision:** Timeout is implemented as a `TimeoutDealer` wrapper that
+intercepts CALL and YIELD messages. If lego-flow's Dealer timeout change is approved,
+the wrapper delegates directly.
 
 ---
 
-## 6. Phase 1 Completion Checklist
+## 4. Phase 1 Completion Checklist
 
 - [ ] All modules compile with Maven (`mvn clean compile`)
 - [ ] All modules compile with Gradle (`./gradlew clean classes`)
 - [ ] All tests pass with Maven (`mvn clean test`)
 - [ ] All tests pass with Gradle (`./gradlew clean test --rerun-tasks`)
+- [ ] Kill procedures work correctly on top of lego-flow's WampRouter
+- [ ] Statistics correctly track calls and messages
+- [ ] Call timeout enforces deadline, sends INTERRUPT on expiry
 - [ ] README.md reflects Phase 1 features
-- [ ] AGENTS.md build commands verified
-- [ ] Architecture diagram updated in README.md
+- [ ] No WAMP core classes duplicated from lego-flow
 
 ---
 
-## 7. Test Count Targets
+## 5. Test Count Targets
 
 | Module | Target Tests |
 |--------|-------------|
-| rwamp-core | 25+ |
-| rwamp-router | 35+ |
-| rwamp-client | 20+ |
-| **Phase 1 Total** | **80+** |
+| rwamp-feature-session | 8+ |
+| rwamp-feature-statistics | 5+ |
+| rwamp-feature-timeout | 5+ |
+| **Phase 1 Total** | **18+** |
 
 ---
 
-## 8. Dependencies & Build Verification
+## 6. Build Verification
 
 | Check | Status |
 |-------|--------|
-| No module references `ssg.legoflow` groupId | ⬜ Pending |
-| All modules declare JUnit + SLF4J test dependencies | ⬜ Pending |
+| `lego-flow-wamp` dependency resolved | ⬜ Pending |
+| No duplicate WAMP message/session/broker classes | ⬜ Pending |
+| All RWAMP classes under `ssg.rwamp` package | ⬜ Pending |
 | `mvn clean test` passes | ⬜ Pending |
 | `./gradlew clean test --rerun-tasks` passes | ⬜ Pending |

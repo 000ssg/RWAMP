@@ -13,20 +13,25 @@ After Phase 2, RWAMP has:
 - **Testament API** — schedule events on session detach/destroy
 - **Virtual Sessions** — create virtual WAMP sessions from HTTP-authenticated users
 
+All features built on top of lego-flow's `Broker`, `Dealer`, `Realm`, and `WampRouter`.
+
 ---
 
 ## 2. Reflection API
 
-**Package:** `ssg.rwamp.router.feature.reflection`
+**Package:** `ssg.rwamp.feature.reflection`
+
+Re-uses lego-flow's `Dealer` and `Broker`. Reflection procedures are registered
+as local procedures with the Dealer via meta procedure registration.
 
 ### 2.1 Data Model
 | Task | Status |
 |------|--------|
-| `ReflectionRegistry` class — per-realm registry for types, procedures, errors, topics | ⬜ Pending |
-| `ReflectionEntry` record — name, category, metadata map | ⬜ Pending |
-| Registry scoped by realm (stored in RealmManager or per-realm) | ⬜ Pending |
+| `ReflectionRegistry` — per-realm registry for types, procedures, errors, topics | ⬜ Pending |
+| `ReflectionRegistry` reads from lego-flow's `Broker` (subscriptions) and `Dealer` (registrations) | ⬜ Pending |
+| `ReflectionRegistry` scoped by realm name | ⬜ Pending |
 
-### 2.2 Procedures
+### 2.2 Procedures (registered as meta/local procedures)
 | Task | Status |
 |------|--------|
 | `wamp.reflection.topic.list` — list topics with subscribers | ⬜ Pending |
@@ -40,19 +45,13 @@ After Phase 2, RWAMP has:
 ### 2.3 Event-Driven Reflection
 | Task | Status |
 |------|--------|
-| `wamp.reflect.define` topic — register type/procedure/error definitions | ⬜ Pending |
-| `wamp.reflect.describe` topic — request definitions | ⬜ Pending |
+| `wamp.reflect.define` topic handler — register type/procedure/error definitions | ⬜ Pending |
+| `wamp.reflect.describe` topic handler — request definitions | ⬜ Pending |
 | `wamp.reflect.on_define` event — published when something is defined | ⬜ Pending |
 | `wamp.reflect.on_undefine` event — published when something is undefined | ⬜ Pending |
-| Automatic reflection on REGISTER/PUBLISH (capture procedure signatures from options) | ⬜ Pending |
+| `ReflectionInterceptor` — intercepts REGISTER/PUBLISH via wrapper, captures metadata | ⬜ Pending |
 
-### 2.4 Reflection Meta (self-description)
-| Task | Status |
-|------|--------|
-| Each reflection procedure provides its own `getReflectionMeta()` (parameter schema) | ⬜ Pending |
-| Reflection procedures are discoverable via `wamp.reflection.procedure.list` | ⬜ Pending |
-
-### 2.5 Tests
+### 2.4 Tests
 | Task | Status |
 |------|--------|
 | `ReflectionAPITest` — topic.list/topic.describe | ⬜ Pending |
@@ -63,23 +62,29 @@ After Phase 2, RWAMP has:
 
 **Reference:** xLib `WAMP_FP_Reflection.java`
 
+**Key design decision:** Reflection reads live data from lego-flow's Broker and Dealer.
+No separate state tracking — queries Broker's subscription maps and Dealer's registration
+maps at call time.
+
 ---
 
 ## 3. Testament API
 
-**Package:** `ssg.rwamp.router.feature.testament`
+**Package:** `ssg.rwamp.feature.testament`
+
+Re-uses lego-flow's `WampSession` and `Broker`. Testament publishing hooks into
+session close lifecycle.
 
 ### 3.1 Core Implementation
 | Task | Status |
 |------|--------|
-| `TestamentManager` class — stores testaments per session | ⬜ Pending |
+| `TestamentManager` — stores testaments per session (keyed by session ID) | ⬜ Pending |
 | Testament data: topic, args, kwargs, publish_options | ⬜ Pending |
-| Testament scope: `detached` (session disconnect) vs `destroyed` (session finalized) | ⬜ Pending |
-| `wamp.session.add_testament` procedure | ⬜ Pending |
-| `wamp.session.flush_testament` procedure | ⬜ Pending |
-| Testament auto-publish on session close (detached scope) | ⬜ Pending |
-| Testament auto-publish on session destroy (destroyed scope) | ⬜ Pending |
-| Integration with session lifecycle (called from `WampSession.close()`) | ⬜ Pending |
+| Testament scope: `detached` vs `destroyed` | ⬜ Pending |
+| `wamp.session.add_testament` procedure (registered as meta procedure) | ⬜ Pending |
+| `wamp.session.flush_testament` procedure (registered as meta procedure) | ⬜ Pending |
+| Testament auto-publish on session close (calls Broker.handlePublish) | ⬜ Pending |
+| `TestamentSessionListener` — hooks into `sessionLeft()` to trigger testament publish | ⬜ Pending |
 
 ### 3.2 Tests
 | Task | Status |
@@ -92,34 +97,44 @@ After Phase 2, RWAMP has:
 
 **Reference:** xLib `WAMP_FP_TestamentMetaAPI.java`
 
+**Key design decision:** Testament uses a `TestamentSessionListener` callback that is
+invoked when `WampRouter.sessionLeft()` is called. If proposed meta procedure registration
+is approved, add/flush are registered meta procedures. Otherwise, they are handled by
+a wrapper router.
+
 ---
 
 ## 4. Virtual Sessions
 
-**Package:** `ssg.rwamp.router.feature.virtualsession`
+**Package:** `ssg.rwamp.feature.virtual`
+
+Re-uses lego-flow's `WampSession`, `Realm`, and `WampRouter`. Virtual sessions
+are lightweight — no transport, just identity.
 
 ### 4.1 Core Implementation
 | Task | Status |
 |------|--------|
-| `VirtualSessionManager` class — manages virtual sessions per realm | ⬜ Pending |
-| `VirtualSession` — lightweight session without transport (auth identity only) | ⬜ Pending |
-| `virtual_session.register` procedure — register a virtual session with auth info | ⬜ Pending |
-| `virtual_session.unregister` procedure — unregister a virtual session | ⬜ Pending |
-| Publish `wamp.session.on_join` meta event for virtual session | ⬜ Pending |
-| Publish `wamp.session.on_leave` meta event for virtual session | ⬜ Pending |
-| Virtual sessions appear in `wamp.session.list` and `wamp.session.count` | ⬜ Pending |
-| Virtual sessions can be killed via `wamp.session.kill` | ⬜ Pending |
+| `VirtualSessionManager` — manages virtual sessions per realm | ⬜ Pending |
+| `VirtualSession` — auth identity (authid, authrole, authmethod) + session ID | ⬜ Pending |
+| `virtual_session.register` procedure — allocate session ID, set auth, call `sessionJoined()` | ⬜ Pending |
+| `virtual_session.unregister` procedure — remove session, call `sessionLeft()` | ⬜ Pending |
+| Virtual sessions appear in `wamp.session.list` and `wamp.session.count` (via Realm) | ⬜ Pending |
+| Virtual sessions can be killed via `wamp.session.kill` (from Phase 1) | ⬜ Pending |
 
 ### 4.2 Tests
 | Task | Status |
 |------|--------|
 | `VirtualSessionTest` — register virtual session | ⬜ Pending |
-| `VirtualSessionTest` — virtual session appears in session meta | ⬜ Pending |
-| `VirtualSessionTest` — virtual session on_join event | ⬜ Pending |
+| `VirtualSessionTest` — virtual session appears in session meta (list/count/get) | ⬜ Pending |
+| `VirtualSessionTest` — on_join event published for virtual session | ⬜ Pending |
 | `VirtualSessionTest` — unregister + on_leave event | ⬜ Pending |
 | `VirtualSessionTest` — kill virtual session via session.meta.kill | ⬜ Pending |
 
 **Reference:** xLib `WAMP_FP_VirtualSession.java`
+
+**Key design decision:** Virtual sessions are `WampSession` instances added to the
+`Realm.sessions` map (via `Realm.getActiveSessions()` accessor). No transport is
+associated — they exist purely for identity mapping.
 
 ---
 
@@ -128,11 +143,11 @@ After Phase 2, RWAMP has:
 - [ ] All modules compile with Maven
 - [ ] All modules compile with Gradle
 - [ ] All tests pass (Phase 1 + Phase 2 combined)
-- [ ] Reflection API self-describes via `wamp.reflection.procedure.describe`
+- [ ] Reflection API returns live data from lego-flow Broker/Dealer
 - [ ] Testaments publish correctly on session lifecycle events
 - [ ] Virtual sessions integrate with session meta API
 - [ ] README.md updated with Phase 2 features
-- [ ] Architecture diagram updated
+- [ ] No WAMP core classes duplicated from lego-flow
 
 ---
 
@@ -140,8 +155,8 @@ After Phase 2, RWAMP has:
 
 | Feature | Target Tests |
 |---------|-------------|
-| Reflection API | 15+ |
-| Testament API | 8+ |
-| Virtual Sessions | 8+ |
-| **Phase 2 Total** | **31+** |
-| **Cumulative (P1+P2)** | **110+** |
+| Reflection API | 10+ |
+| Testament API | 5+ |
+| Virtual Sessions | 6+ |
+| **Phase 2 Total** | **21+** |
+| **Cumulative (P1+P2)** | **39+** |

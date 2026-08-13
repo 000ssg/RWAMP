@@ -1,205 +1,206 @@
 # RWAMP — Detailed Implementation Plan
 
-**Project:** RWAMP (Robust WAMP) — Production-grade WAMP v2 implementation in Java
+**Project:** RWAMP — Extended WAMP v2 implementation for Java 25+
 **Date:** 2026-08-13
-**Status:** Planning
+**Status: In Progress (Phase 1 pending)**
 
 ---
 
 ## 1. Project Overview
 
-RWAMP is a standalone WAMP v2 (Web Application Messaging Protocol) implementation for Java 25+,
-providing both a **router** (Broker + Dealer) and **client** (Caller/Callee/Publisher/Subscriber).
-It combines the modern Java patterns of lego-flow (sealed interfaces, records, virtual threads)
-with the feature completeness of xLib (30+ WAMP features including REST bridge, reflection,
-testaments, virtual sessions, and statistics).
+RWAMP is a **WAMP v2 extension project built on top of lego-flow's WAMP implementation**.
+It re-uses lego-flow's core WAMP components (messages, session, broker, dealer, router,
+serialization, auth, WebSocket transport) and adds the missing production-grade features
+found in xLib's WAMP implementation.
+
+### Key Architectural Decision
+
+**lego-flow's WAMP is the foundation, not xLib.** RWAMP depends on `ssg:lego-flow-wamp`
+and extends it. No WAMP-specific structures (messages, session, broker, dealer, serialization)
+should be re-created — they are re-used from lego-flow. xLib serves only as a **reference
+for feature design**, not as a code source.
+
+Where lego-flow's WAMP needs changes to support new features, those changes are proposed
+for upstream inclusion in lego-flow (see Section 3).
 
 ### Goals
 
-- **Production-ready WAMP router** with all Advanced Profile features
-- **Full client library** supporting all four WAMP roles
-- **REST over WAMP bridge** for HTTP-to-WAMP interop
-- **Modern Java codebase** — JDK 25+, sealed interfaces, records, virtual threads
-- **Dual build system** — Maven + Gradle, following lego-flow conventions
-- **Comprehensive test coverage** — unit tests for every feature, integration tests for end-to-end flows
-
-### What RWAMP Is Not
-
-- Not a general-purpose framework (unlike lego-flow) — focused solely on WAMP
-- Not a port of xLib — uses lego-flow's architectural patterns, xLib is a reference only
-- Not a library for embedding — designed as a standalone service or lightweight library
+- **Re-use lego-flow WAMP fully** — messages, session, broker, dealer, router, realm,
+  serialization, auth, WebSocket transport
+- **Add xLib features missing in lego-flow** — session kill, testaments, virtual sessions,
+  reflection API, call timeout, call rerouting, statistics, REST bridge
+- **Avoid duplicating WAMP structures** — no parallel WampMessage, Broker, Dealer, etc.
+- **Propose lego-flow changes** where graceful extension is not possible
 
 ---
 
-## 2. Architecture Decisions
+## 2. Architecture
 
-### 2.1 Module Structure
+### 2.1 What RWAMP Re-uses from lego-flow
 
-| Module | Artifact | Purpose |
-|--------|----------|---------|
-| `rwamp-core` | `ssg:rwamp-core` | Core protocol: messages, session, serialization, transport interface, auth interfaces |
-| `rwamp-router` | `ssg:rwamp-router` | Router: Broker, Dealer, Realm, RealmManager, feature providers, meta APIs |
-| `rwamp-client` | `ssg:rwamp-client` | Client roles: Caller, Callee, Publisher, Subscriber, session lifecycle |
-| `rwamp-websocket` | `ssg:rwamp-websocket` | WebSocket transport adapter for router and client |
-| `rwamp-rest` | `ssg:rwamp-rest` | REST over WAMP bridge: HTTP endpoints → WAMP calls, virtual sessions |
-| `rwamp-auth` | `ssg:rwamp-auth` | Authentication providers: CRA, Ticket, Cryptosign, Any |
+| Component | lego-flow Class | RWAMP Usage |
+|-----------|----------------|-------------|
+| Messages | `WampMessage` (sealed interface + 20 records) | Re-used as-is |
+| Session | `WampSession` | Extended with state machine (if approved) |
+| Broker | `Broker` | Re-used as-is |
+| Dealer | `Dealer` | Extended with timeout/rerouting (if approved) |
+| Router | `WampRouter` | Extended with kill procedures (if approved) |
+| Realm | `Realm`, `RealmManager` | Re-used as-is |
+| Client roles | `Caller`, `Callee`, `Publisher`, `Subscriber` | Re-used as-is |
+| Serialization | JSON, MessagePack, CBOR serializers | Re-used as-is |
+| Transport | `WampTransport` interface, `InMemoryTransport` | Re-used as-is |
+| Auth | `CraAuth`, `TicketAuth`, `CryptosignAuth`, `WampAuthorizer` | Re-used as-is |
+| WebSocket | `WebSocketWampService`, `WampWebSocketHandler` | Re-used as-is |
+
+### 2.2 What RWAMP Adds (New Code)
+
+| Feature | Source Inspiration | Module |
+|---------|-------------------|--------|
+| Session kill procedures (`wamp.session.kill*`) | xLib `WAMP_FP_SessionMetaAPI` | `rwamp-feature-session` |
+| Testament API (`wamp.session.add_testament`) | xLib `WAMP_FP_TestamentMetaAPI` | `rwamp-feature-testament` |
+| Virtual sessions (`virtual_session.register`) | xLib `WAMP_FP_VirtualSession` | `rwamp-feature-virtual` |
+| Reflection API (`wamp.reflection.*`) | xLib `WAMP_FP_Reflection` | `rwamp-feature-reflection` |
+| Statistics tracking | xLib `WAMPStatistics` | `rwamp-feature-statistics` |
+| REST over WAMP bridge | xLib `REST_WAMP_MethodsProvider` | `rwamp-rest` |
+| Call rerouting | xLib `WAMPRPCDealer` rerouting | `rwamp-feature-rerouting` |
+| Pattern-based registration | xLib `WAMPRPCDealer` pattern | `rwamp-feature-registration` |
+
+### 2.3 Module Structure
 
 ```mermaid
 graph TD
-    subgraph "rwamp-core"
-        C1["WampMessage (sealed interface + records)"]
-        C2["WampSession (state machine)"]
-        C3["WampSerializer + JSON/MsgPack/CBOR"]
-        C4["WampTransport (interface)"]
-        C5["Auth interfaces"]
+    subgraph "lego-flow (dependency)"
+        LF1["lego-flow-wamp<br/>core: messages, session, broker, dealer, router,<br/>realm, serialization, auth, websocket"]
     end
 
-    subgraph "rwamp-router"
-        R1["Broker (Pub/Sub)"]
-        R2["Dealer (RPC)"]
-        R3["Realm + RealmManager"]
-        R4["Feature Providers"]
-        R5["Session Meta API"]
-        R6["Reflection API"]
-        R7["Testament API"]
-        R8["Virtual Sessions"]
-        R9["Statistics"]
+    subgraph "RWAMP (extension project)"
+        RW1["rwamp-feature-session<br/>kill procedures, state machine wrapper"]
+        RW2["rwamp-feature-testament<br/>testament scheduling + lifecycle hooks"]
+        RW3["rwamp-feature-virtual<br/>virtual session manager"]
+        RW4["rwamp-feature-reflection<br/>procedure/topic/type introspection"]
+        RW5["rwamp-feature-statistics<br/>call + message counters"]
+        RW6["rwamp-feature-rerouting<br/>cross-realm call forwarding"]
+        RW7["rwamp-feature-registration<br/>pattern matching + revocation"]
+        RW8["rwamp-rest<br/>REST over WAMP bridge"]
     end
 
-    subgraph "rwamp-client"
-        CL1["Caller"]
-        CL2["Callee"]
-        CL3["Publisher"]
-        CL4["Subscriber"]
-    end
-
-    subgraph "rwamp-websocket"
-        WS1["WebSocket WampTransport"]
-        WS2["Router WebSocket Handler"]
-        WS3["Client WebSocket Handler"]
-    end
-
-    subgraph "rwamp-rest"
-        REST1["REST → WAMP bridge"]
-        REST2["Virtual Session Manager"]
-        REST3["HTTP Auth → WAMP identity"]
-    end
-
-    subgraph "rwamp-auth"
-        A1["CRA Auth"]
-        A2["Ticket Auth"]
-        A3["Cryptosign Auth"]
-        A4["Any Auth"]
-    end
-
-    R1 --> C1
-    R2 --> C1
-    R3 --> C1
-    R4 --> R1
-    R4 --> R2
-    R5 --> R3
-    R6 --> R3
-    R7 --> R3
-    R8 --> R3
-    R9 --> R3
-    CL1 --> C4
-    CL2 --> C4
-    CL3 --> C4
-    CL4 --> C4
-    WS1 --> C4
-    REST1 --> CL1
-    REST2 --> R8
-    A1 --> C5
-    A2 --> C5
-    A3 --> C5
-    A4 --> C5
-
-    style C1 fill:#e1f5fe
-    style C2 fill:#e1f5fe
-    style C3 fill:#e1f5fe
-    style C4 fill:#e1f5fe
-    style C5 fill:#e1f5fe
+    RW1 --> LF1
+    RW2 --> LF1
+    RW3 --> LF1
+    RW4 --> LF1
+    RW5 --> LF1
+    RW6 --> LF1
+    RW7 --> LF1
+    RW8 --> LF1
+    RW8 --> RW3
 ```
 
-### 2.2 Package Structure
+### 2.4 Package Structure
 
-**rwamp-core:** `ssg.rwamp.core`
-- `ssg.rwamp.core.WampMessage` — sealed interface with all 20+ message records
-- `ssg.rwamp.core.WampSession` — session with full state machine
-- `ssg.rwamp.core.serialization` — JSON, MessagePack, CBOR serializers
-- `ssg.rwamp.core.transport.WampTransport` — transport abstraction
-- `ssg.rwamp.core.auth` — auth provider interfaces
+All packages under `ssg.rwamp`:
 
-**rwamp-router:** `ssg.rwamp.router`
-- `ssg.rwamp.router.Broker` — pub/sub with all advanced features
-- `ssg.rwamp.router.Dealer` — RPC with all advanced features
-- `ssg.rwamp.router.Realm` / `RealmManager` — multi-realm support
-- `ssg.rwamp.router.feature` — feature providers (meta, reflection, testament, virtual)
-- `ssg.rwamp.router.stat` — statistics tracking
-
-**rwamp-client:** `ssg.rwamp.client`
-- `ssg.rwamp.client.Caller` / `Callee` / `Publisher` / `Subscriber`
-- `ssg.rwamp.client.WampClient` — entry point combining roles + transport + session lifecycle
-
-**rwamp-websocket:** `ssg.rwamp.transport.websocket`
-- Server-side and client-side WebSocket handlers
-
-**rwamp-rest:** `ssg.rwamp.rest`
-- REST methods provider, virtual session manager, auth adapter
-
-**rwamp-auth:** `ssg.rwamp.auth`
-- `CraAuthProvider`, `TicketAuthProvider`, `CryptosignAuthProvider`, `AnyAuthProvider`
-
-### 2.3 Key Design Principles
-
-| Principle | Source | Description |
-|-----------|--------|-------------|
-| Sealed interfaces + records | lego-flow | WampMessage as sealed interface, all message types as records |
-| State machine sessions | xLib | 4-state lifecycle: `opening → established → closing → closed` |
-| Feature providers | xLib | Pluggable feature activation per realm (reflection, testament, etc.) |
-| Virtual threads | lego-flow | Per-connection virtual thread processing |
-| CompletableFuture | lego-flow | Async call/results via Future, not callbacks |
-| In-memory transport for testing | lego-flow | Pair-based transport for isolated unit tests |
-| No external HTTP deps in core | lego-flow | Core is transport-agnostic; HTTP/WS is separate module |
-
-### 2.4 Build System
-
-- **Maven** — POM hierarchy with root aggregator
-- **Gradle** — `settings.gradle.kts` + `build.gradle.kts` per module
-- **Java 25** — `maven.compiler.release=25`
-- **groupId:** `ssg`
-- **JUnit 5** — Jupiter with AssertJ + Mockito
+| Package | Purpose |
+|---------|---------|
+| `ssg.rwamp.feature.session` | Session kill procedures, state machine wrapper |
+| `ssg.rwamp.feature.testament` | Testament manager, add/flush procedures |
+| `ssg.rwamp.feature.virtual` | Virtual session manager, register/unregister |
+| `ssg.rwamp.feature.reflection` | Reflection registry, procedure/topic introspection |
+| `ssg.rwamp.feature.statistics` | Call and message statistics counters |
+| `ssg.rwamp.feature.rerouting` | Cross-realm call forwarding |
+| `ssg.rwamp.feature.registration` | Pattern-based registration, revocation |
+| `ssg.rwamp.rest` | REST over WAMP bridge, virtual session integration |
 
 ---
 
-## 3. Feature Inventory (from WAMP_NEXT_STEPS.md)
+## 3. Proposed Changes to lego-flow WAMP (For Approval)
 
-### Phase 1 — Foundation (Session Meta, Timeout, Statistics)
-| Feature | xLib Reference | lego-flow Reference | Effort |
-|---------|---------------|---------------------|--------|
-| Session Meta API (kill) | `WAMP_FP_SessionMetaAPI` | `WampRouter` (partial) | 1-2 days |
-| Call Timeout | `WAMPRPCDealer` | `Dealer` (no timeout) | 1-2 days |
-| Statistics | `WAMPStatistics` | None | 2-3 days |
-| Session state machine | `WAMPSessionState` | `WampSession` (boolean) | 1 day |
+These changes to lego-flow's `messaging/wamp` module would make extension easier
+and more graceful. Each is backward-compatible (additive only).
 
-### Phase 2 — Discovery & Identity (Reflection, Testament, Virtual Sessions)
-| Feature | xLib Reference | lego-flow Reference | Effort |
-|---------|---------------|---------------------|--------|
-| Reflection API | `WAMP_FP_Reflection` | None | 5-7 days |
-| Testament API | `WAMP_FP_TestamentMetaAPI` | None | 2-3 days |
-| Virtual Sessions | `WAMP_FP_VirtualSession` | None | 5-7 days |
+### 3.1 WampSession — Session State Enum
 
-### Phase 3 — Integration (REST Bridge, Rerouting)
-| Feature | xLib Reference | lego-flow Reference | Effort |
-|---------|---------------|---------------------|--------|
-| REST over WAMP | `REST_WAMP_MethodsProvider` | None | 7-10 days |
-| Call Rerouting | `WAMPRPCDealer` | `Dealer` (no reroute) | 3-5 days |
+**Problem:** `established` boolean is insufficient for session lifecycle tracking.
+xLib has 4-state machine (`opening`, `established`, `closing`, `closed`).
 
-### Phase 4 — Polish (Pattern Registration, Revocation)
-| Feature | xLib Reference | lego-flow Reference | Effort |
-|---------|---------------|---------------------|--------|
-| Pattern-based registration | `WAMPRPCDealer` (pattern) | `Dealer` (exact only) | 3-5 days |
-| Registration revocation/meta | `WAMPRPCDealer` | `Dealer` (no revocation) | 2-3 days |
+**Proposed change in lego-flow:**
+```java
+// Add to WampSession:
+public enum SessionState { OPENING, ESTABLISHED, CLOSING, CLOSED }
+private SessionState state = SessionState.OPENING;
+public SessionState getState() { ... }
+public void setState(SessionState newState) { /* with transition validation */ }
+public boolean isEstablished() { return state == SessionState.ESTABLISHED; } // backward compat
+```
+
+**Without this change:** RWAMP wraps WampSession with its own state tracking (works but
+less clean — two sources of truth for session state).
+
+**Risk:** Low. Additive, backward-compatible (`isEstablished()` stays).
+
+### 3.2 WampRouter — Extensible Meta Procedure Registration
+
+**Problem:** `isMetaProcedure()` and `handleMetaCall()` are hardcoded to 3 procedures.
+Adding kill procedures requires modifying WampRouter.
+
+**Proposed change in lego-flow:**
+```java
+// Add to WampRouter:
+private final Map<String, MetaProcedureHandler> metaProcedures = new ConcurrentHashMap<>();
+public void registerMetaProcedure(String procedure, MetaProcedureHandler handler) { ... }
+```
+Where `MetaProcedureHandler` is a `Consumer<WampMessage.Call>`.
+
+**Without this change:** RWAMP wraps WampRouter with a subclass that overrides `route()`
+(method interception — works but fragile).
+
+**Risk:** Low. Additive, existing hardcoded procedures stay as defaults.
+
+### 3.3 Dealer — Call Timeout Support
+
+**Problem:** Dealer has no timeout tracking for pending calls. Call timeout is an
+Advanced Profile feature.
+
+**Proposed change in lego-flow:**
+```java
+// Add to Dealer:
+private ScheduledExecutorService timeoutExecutor; // optional, injected
+public void handleCall(WampMessage.Call call, ...) {
+    // check timeout option, schedule interrupt if present
+}
+// Add PendingInvocation to the record: long timeoutNanos
+```
+
+**Without this change:** RWAMP intercepts CALL messages before they reach the Dealer
+(wraps the router — works but duplicates routing logic).
+
+**Risk:** Low. Additive, timeout is optional (only when `timeout` option present).
+
+### 3.4 Realm — Active Sessions Accessor
+
+**Problem:** `Realm` has `sessions` map (private) but no accessor for iteration.
+Kill procedures need to iterate sessions.
+
+**Proposed change in lego-flow:**
+```java
+// Add to Realm:
+public Map<Long, WampSession> getActiveSessions() { return Map.copyOf(sessions); }
+```
+
+**Without this change:** RWAMP maintains its own session registry parallel to Realm's
+(duplicates session tracking).
+
+**Risk:** Trivial. Read-only accessor.
+
+### 3.5 Summary of lego-flow Changes
+
+| # | Change | Module | Effort | Needed By |
+|---|--------|--------|--------|-----------|
+| 1 | `SessionState` enum in `WampSession` | core | 0.5 day | Phase 1 |
+| 2 | Meta procedure registration in `WampRouter` | router | 0.5 day | Phase 1 |
+| 3 | Call timeout in `Dealer` | router | 1 day | Phase 1 |
+| 4 | `getActiveSessions()` in `Realm` | realm | 0.25 day | Phase 1 |
+
+**Total lego-flow changes: ~2.25 days**
 
 ---
 
@@ -222,17 +223,21 @@ Detailed per-phase plans with step-by-step implementation tracking:
 | Step | Status |
 |------|--------|
 | Create `prototype` branch from `master` | ✅ Done |
-| Write plan documents (this set) | ✅ Done |
-| First commit (plan) | ⬜ Pending |
+| Write plan documents | ✅ Done |
+| First commit with plan | ✅ Done |
+
+### lego-flow Changes (pending approval)
+| Step | Status |
+|------|--------|
+| SessionState enum in WampSession | ⬜ Pending approval |
+| Meta procedure registration in WampRouter | ⬜ Pending approval |
+| Call timeout in Dealer | ⬜ Pending approval |
+| getActiveSessions() in Realm | ⬜ Pending approval |
 
 ### Phase 1 — Foundation
 | Milestone | Status |
 |-----------|--------|
-| Project scaffolding (POM, Gradle, AGENTS.md) | ⬜ Pending |
-| rwamp-core module (messages, session, serialization, transport) | ⬜ Pending |
-| rwamp-router module (Broker, Dealer, Realm) | ⬜ Pending |
-| rwamp-client module (Caller, Callee, Publisher, Subscriber) | ⬜ Pending |
-| Session state machine | ⬜ Pending |
+| Project scaffolding (POM, Gradle, AGENTS.md, dependency on lego-flow-wamp) | ⬜ Pending |
 | Session Meta API (kill procedures) | ⬜ Pending |
 | Call Timeout | ⬜ Pending |
 | Statistics | ⬜ Pending |
@@ -270,30 +275,19 @@ Detailed per-phase plans with step-by-step implementation tracking:
 ## 6. Test Strategy
 
 ### Test Organization
-- **Unit tests** — per-module `src/test/java`, using `InMemoryTransport` pairs
-- **Integration tests** — end-to-end flows with WebSocket transport
-- **Feature tests** — one test class per feature provider
+- **Feature tests** — one test class per feature provider, using `InMemoryTransport` from lego-flow
+- **Integration tests** — end-to-end flows using WebSocket transport from lego-flow
+- **No duplicate tests for re-used components** — lego-flow tests cover the core
 
 ### Test Patterns (from lego-flow)
 - `InMemoryTransport.createPair()` — paired transports for isolated testing
 - AssertJ assertions — `assertThat(response).isInstanceOf(...)`
-- Per-message routing tests — subscribe, publish, register, call, yield
+- Tests import lego-flow WAMP classes directly
 
 ### Required Test Coverage
-- Every Broker/Dealer method has a dedicated test
-- Every feature provider has at least 3 test cases (happy path, error, edge)
-- Session state transitions tested explicitly
-- Statistics counters verified after operations
-- REST bridge tested with mock HTTP requests
-
-### xLib Test Reference
-| xLib Test | RWAMP Equivalent |
-|-----------|-----------------|
-| `TestRPC_call_rerouting` | `CallReroutingTest` |
-| `TestRPC_reflection` | `ReflectionAPITest` |
-| `TestRPC_testament` | `TestamentTest` |
-| `Test_WAMPOrchestra` | `RestWampBridgeTest` |
-| `SessionLifecycleDemoTest` | `SessionMetaKillTest` |
+- Every RWAMP feature has dedicated tests
+- Integration tests verify RWAMP features work correctly on top of lego-flow components
+- Statistics verified with counters before/after operations
 
 ---
 
@@ -302,35 +296,30 @@ Detailed per-phase plans with step-by-step implementation tracking:
 | Branch | Purpose |
 |--------|---------|
 | `master` | Clean main branch; initial plan commit |
-| `prototype` | All development; implementation branches merge here |
-
-Development workflow:
-1. Create `prototype` from `master`
-2. Implement features on `prototype` (or topic branches merged to `prototype`)
-3. Each phase is a set of commits on `prototype`
-4. Plan documents updated in-place as phases progress
+| `prototype` | All development; implementation commits |
 
 ---
 
 ## 8. References
 
-- **WAMP_NEXT_STEPS.md** — Original comparison document with feature analysis
-- **xLib WAMP** — `/Users/sergey.sidorov/work/projects/github/xLib` (reference implementation)
-- **lego-flow WAMP** — `/Users/sergey.sidorov/work/projects/github/lego-flow/messaging/wamp` (pattern source)
+- **WAMP_NEXT_STEPS.md** — Original comparison document
+- **lego-flow WAMP** — `/Users/sergey.sidorov/work/projects/github/lego-flow/messaging/wamp` (basis)
+- **xLib WAMP** — `/Users/sergey.sidorov/work/projects/github/xLib` (feature reference only)
 - **lego-flow AGENTS.md** — Development practices to adopt
-- **WAMP RFC** — https://wamp-proto.org/spec/wamp/
 
 ---
 
 ## 9. Effort Summary
 
-| Phase | Days | Cumulative |
-|-------|------|------------|
-| Setup + scaffolding | 2 | 2 |
-| Phase 1 — Foundation | 6 | 8 |
-| Phase 2 — Discovery & Identity | 13 | 21 |
-| Phase 3 — Integration | 14 | 35 |
-| Phase 4 — Polish | 5 | 40 |
-| Buffer (20%) | 8 | **48** |
+| Item | Days |
+|------|------|
+| Setup + scaffolding | 2 |
+| Proposed lego-flow changes (if approved) | 2.25 |
+| Phase 1 — Foundation (RWAMP) | 5 |
+| Phase 2 — Discovery & Identity | 13 |
+| Phase 3 — Integration | 14 |
+| Phase 4 — Polish | 5 |
+| Buffer (15%) | 6 |
+| **Total** | **47.25** |
 
-**Total estimated: 40 working days (6-8 weeks at 1 person)**
+**~47 working days (6-8 weeks at 1 person)**
