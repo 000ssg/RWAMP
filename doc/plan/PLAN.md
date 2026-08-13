@@ -2,7 +2,7 @@
 
 **Project:** RWAMP — Extended WAMP v2 implementation for Java 25+
 **Date:** 2026-08-13
-**Status: In Progress (Phase 1 pending)**
+**Status: In Progress (Phase 0 completed — lego-flow changes merged)**
 
 ---
 
@@ -20,8 +20,8 @@ and extends it. No WAMP-specific structures (messages, session, broker, dealer, 
 should be re-created — they are re-used from lego-flow. xLib serves only as a **reference
 for feature design**, not as a code source.
 
-Where lego-flow's WAMP needs changes to support new features, those changes are proposed
-for upstream inclusion in lego-flow (see Section 3).
+Where lego-flow's WAMP needed changes to support new features, those changes were implemented
+upstream in lego-flow (see Section 3).
 
 ### Goals
 
@@ -30,7 +30,7 @@ for upstream inclusion in lego-flow (see Section 3).
 - **Add xLib features missing in lego-flow** — session kill, testaments, virtual sessions,
   reflection API, call timeout, call rerouting, statistics, REST bridge
 - **Avoid duplicating WAMP structures** — no parallel WampMessage, Broker, Dealer, etc.
-- **Propose lego-flow changes** where graceful extension is not possible
+- **Follow MDB-SQL dependency patterns** — GitHub Packages, dual-build, unique artifact names
 
 ---
 
@@ -40,16 +40,16 @@ for upstream inclusion in lego-flow (see Section 3).
 
 | Component | lego-flow Class | RWAMP Usage |
 |-----------|----------------|-------------|
-| Messages | `WampMessage` (sealed interface + 20 records) | Re-used as-is |
-| Session | `WampSession` | Extended with state machine (if approved) |
+| Messages | `WampMessage` (sealed interface + records) | Re-used as-is |
+| Session | `WampSession` + `SessionState` | Uses getState() for lifecycle |
 | Broker | `Broker` | Re-used as-is |
-| Dealer | `Dealer` | Extended with timeout/rerouting (if approved) |
-| Router | `WampRouter` | Extended with kill procedures (if approved) |
-| Realm | `Realm`, `RealmManager` | Re-used as-is |
+| Dealer | `Dealer` + setTimeoutExecutor() | Uses timeout feature |
+| Router | `WampRouter` + registerMetaProcedure() | Uses meta procedure hooks |
+| Realm | `Realm` + getActiveSessions() | Uses session snapshot |
 | Client roles | `Caller`, `Callee`, `Publisher`, `Subscriber` | Re-used as-is |
 | Serialization | JSON, MessagePack, CBOR serializers | Re-used as-is |
 | Transport | `WampTransport` interface, `InMemoryTransport` | Re-used as-is |
-| Auth | `CraAuth`, `TicketAuth`, `CryptosignAuth`, `WampAuthorizer` | Re-used as-is |
+| Auth | `CraAuth`, `TicketAuth`, `CryptosignAuth` | Re-used as-is |
 | WebSocket | `WebSocketWampService`, `WampWebSocketHandler` | Re-used as-is |
 
 ### 2.2 What RWAMP Adds (New Code)
@@ -69,12 +69,12 @@ for upstream inclusion in lego-flow (see Section 3).
 
 ```mermaid
 graph TD
-    subgraph "lego-flow (dependency)"
-        LF1["lego-flow-wamp<br/>core: messages, session, broker, dealer, router,<br/>realm, serialization, auth, websocket"]
+    subgraph "lego-flow (GitHub Packages dependency)"
+        LF1["ssg:lego-flow-wamp<br/>core: messages, session, broker, dealer, router,<br/>realm, serialization, auth, websocket"]
     end
 
     subgraph "RWAMP (extension project)"
-        RW1["rwamp-feature-session<br/>kill procedures, state machine wrapper"]
+        RW1["rwamp-feature-session<br/>kill procedures, state machine"]
         RW2["rwamp-feature-testament<br/>testament scheduling + lifecycle hooks"]
         RW3["rwamp-feature-virtual<br/>virtual session manager"]
         RW4["rwamp-feature-reflection<br/>procedure/topic/type introspection"]
@@ -101,115 +101,89 @@ All packages under `ssg.rwamp`:
 
 | Package | Purpose |
 |---------|---------|
-| `ssg.rwamp.feature.session` | Session kill procedures, state machine wrapper |
+| `ssg.rwamp.feature.session` | Session kill procedures |
 | `ssg.rwamp.feature.testament` | Testament manager, add/flush procedures |
-| `ssg.rwamp.feature.virtual` | Virtual session manager, register/unregister |
-| `ssg.rwamp.feature.reflection` | Reflection registry, procedure/topic introspection |
+| `ssg.rwamp.feature.virtual` | Virtual session manager |
+| `ssg.rwamp.feature.reflection` | Reflection registry, introspection |
 | `ssg.rwamp.feature.statistics` | Call and message statistics counters |
 | `ssg.rwamp.feature.rerouting` | Cross-realm call forwarding |
 | `ssg.rwamp.feature.registration` | Pattern-based registration, revocation |
-| `ssg.rwamp.rest` | REST over WAMP bridge, virtual session integration |
+| `ssg.rwamp.rest` | REST over WAMP bridge |
 
 ---
 
-## 3. Proposed Changes to lego-flow WAMP (For Approval)
+## 3. lego-flow Changes (Implemented)
 
-These changes to lego-flow's `messaging/wamp` module would make extension easier
-and more graceful. Each is backward-compatible (additive only).
+All 4 proposed changes have been implemented and committed to lego-flow.
 
-### 3.1 WampSession — Session State Enum
+| # | Change | Status | lego-flow Commit |
+|---|--------|--------|-----------------|
+| 1 | `SessionState` enum in `WampSession` | ✅ Merged | `7505aac` |
+| 2 | `registerMetaProcedure()` in `WampRouter` | ✅ Merged | `7505aac` |
+| 3 | `setTimeoutExecutor()` in `Dealer` | ✅ Merged | `7505aac` |
+| 4 | `getActiveSessions()` in `Realm` | ✅ Merged | `7505aac` |
 
-**Problem:** `established` boolean is insufficient for session lifecycle tracking.
-xLib has 4-state machine (`opening`, `established`, `closing`, `closed`).
+### 3.1 SessionState Enum
 
-**Proposed change in lego-flow:**
-```java
-// Add to WampSession:
-public enum SessionState { OPENING, ESTABLISHED, CLOSING, CLOSED }
-private SessionState state = SessionState.OPENING;
-public SessionState getState() { ... }
-public void setState(SessionState newState) { /* with transition validation */ }
-public boolean isEstablished() { return state == SessionState.ESTABLISHED; } // backward compat
-```
+`WampSession` now uses `SessionState` enum (PENDING → ESTABLISHED → CLOSING → CLOSED)
+instead of boolean `established`. Backward-compatible `isEstablished()` preserved.
+New `getState()` accessor available.
 
-**Without this change:** RWAMP wraps WampSession with its own state tracking (works but
-less clean — two sources of truth for session state).
+### 3.2 Meta Procedure Registration
 
-**Risk:** Low. Additive, backward-compatible (`isEstablished()` stays).
+`WampRouter.registerMetaProcedure(name, handler)` and `unregisterMetaProcedure(name)`
+allow external code to register custom meta procedures. Built-in procedures take
+precedence. Handler signature: `(WampMessage.Call, WampTransport) → List<Object>`.
 
-### 3.2 WampRouter — Extensible Meta Procedure Registration
+### 3.3 Call Timeout in Dealer
 
-**Problem:** `isMetaProcedure()` and `handleMetaCall()` are hardcoded to 3 procedures.
-Adding kill procedures requires modifying WampRouter.
+`Dealer.setTimeoutExecutor(ScheduledExecutorService)` enables optional call timeout
+enforcement. When a Call includes `timeout` option (seconds), the Dealer schedules a
+timer. On expiry, sends `wamp.error.timeout` to caller and INTERRUPT to callee.
+Progressive results handling preserved.
 
-**Proposed change in lego-flow:**
-```java
-// Add to WampRouter:
-private final Map<String, MetaProcedureHandler> metaProcedures = new ConcurrentHashMap<>();
-public void registerMetaProcedure(String procedure, MetaProcedureHandler handler) { ... }
-```
-Where `MetaProcedureHandler` is a `Consumer<WampMessage.Call>`.
+### 3.4 Active Sessions Accessor
 
-**Without this change:** RWAMP wraps WampRouter with a subclass that overrides `route()`
-(method interception — works but fragile).
-
-**Risk:** Low. Additive, existing hardcoded procedures stay as defaults.
-
-### 3.3 Dealer — Call Timeout Support
-
-**Problem:** Dealer has no timeout tracking for pending calls. Call timeout is an
-Advanced Profile feature.
-
-**Proposed change in lego-flow:**
-```java
-// Add to Dealer:
-private ScheduledExecutorService timeoutExecutor; // optional, injected
-public void handleCall(WampMessage.Call call, ...) {
-    // check timeout option, schedule interrupt if present
-}
-// Add PendingInvocation to the record: long timeoutNanos
-```
-
-**Without this change:** RWAMP intercepts CALL messages before they reach the Dealer
-(wraps the router — works but duplicates routing logic).
-
-**Risk:** Low. Additive, timeout is optional (only when `timeout` option present).
-
-### 3.4 Realm — Active Sessions Accessor
-
-**Problem:** `Realm` has `sessions` map (private) but no accessor for iteration.
-Kill procedures need to iterate sessions.
-
-**Proposed change in lego-flow:**
-```java
-// Add to Realm:
-public Map<Long, WampSession> getActiveSessions() { return Map.copyOf(sessions); }
-```
-
-**Without this change:** RWAMP maintains its own session registry parallel to Realm's
-(duplicates session tracking).
-
-**Risk:** Trivial. Read-only accessor.
-
-### 3.5 Summary of lego-flow Changes
-
-| # | Change | Module | Effort | Needed By |
-|---|--------|--------|--------|-----------|
-| 1 | `SessionState` enum in `WampSession` | core | 0.5 day | Phase 1 |
-| 2 | Meta procedure registration in `WampRouter` | router | 0.5 day | Phase 1 |
-| 3 | Call timeout in `Dealer` | router | 1 day | Phase 1 |
-| 4 | `getActiveSessions()` in `Realm` | realm | 0.25 day | Phase 1 |
-
-**Total lego-flow changes: ~2.25 days**
+`Realm.getActiveSessions()` returns unmodifiable `Map<Long, WampSession>` snapshot.
+Thread-safe copy, not live-linked to internal registry.
 
 ---
 
-## 4. Phase Plans
+## 4. Dependency Management (following MDB-SQL patterns)
+
+### 4.1 Maven
+
+- Root POM declares `lego-flow.version` property
+- Each module depends on `ssg:lego-flow-wamp:${lego-flow.version}`
+- GitHub Packages repo: `https://maven.pkg.github.com/000ssg/lego-flow`
+- Credentials from `GITHUB_ACTOR` / `GITHUB_TOKEN` env vars
+
+### 4.2 Gradle
+
+- `build.gradle.kts` references `property("legoFlowVersion")`
+- GitHub Packages repo with credentials from env vars
+- Uses `mavenLocal()` for local development override
+
+### 4.3 Local Development
+
+For local development where lego-flow is not published, install lego-flow to Maven
+local first:
+
+```bash
+cd /path/to/lego-flow && mvn install -DskipTests
+```
+
+Both Maven and Gradle pick up from `~/.m2/repository`.
+
+---
+
+## 5. Phase Plans
 
 Detailed per-phase plans with step-by-step implementation tracking:
 
 | Phase | Document | Status |
 |-------|----------|--------|
+| Phase 0 — lego-flow changes | Section 3 above | ✅ Complete |
 | Phase 1 — Foundation | [doc/plan/PHASE_1_Foundation.md](PHASE_1_Foundation.md) | ⬜ Pending |
 | Phase 2 — Discovery & Identity | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ⬜ Pending |
 | Phase 3 — Integration | [doc/plan/PHASE_3_Integration.md](PHASE_3_Integration.md) | ⬜ Pending |
@@ -217,7 +191,7 @@ Detailed per-phase plans with step-by-step implementation tracking:
 
 ---
 
-## 5. Overall Progress Tracking
+## 6. Overall Progress Tracking
 
 ### Repository Setup
 | Step | Status |
@@ -225,21 +199,21 @@ Detailed per-phase plans with step-by-step implementation tracking:
 | Create `prototype` branch from `master` | ✅ Done |
 | Write plan documents | ✅ Done |
 | First commit with plan | ✅ Done |
+| Create AGENTS.md | ✅ Done |
 
-### lego-flow Changes (pending approval)
+### lego-flow Changes
 | Step | Status |
 |------|--------|
-| SessionState enum in WampSession | ⬜ Pending approval |
-| Meta procedure registration in WampRouter | ⬜ Pending approval |
-| Call timeout in Dealer | ⬜ Pending approval |
-| getActiveSessions() in Realm | ⬜ Pending approval |
+| SessionState enum in WampSession | ✅ Merged (commit 7505aac) |
+| Meta procedure registration in WampRouter | ✅ Merged (commit 7505aac) |
+| Call timeout in Dealer | ✅ Merged (commit 7505aac) |
+| getActiveSessions() in Realm | ✅ Merged (commit 7505aac) |
 
 ### Phase 1 — Foundation
 | Milestone | Status |
 |-----------|--------|
-| Project scaffolding (POM, Gradle, AGENTS.md, dependency on lego-flow-wamp) | ⬜ Pending |
+| Project scaffolding (POM, Gradle, dependency on lego-flow-wamp) | ⬜ Pending |
 | Session Meta API (kill procedures) | ⬜ Pending |
-| Call Timeout | ⬜ Pending |
 | Statistics | ⬜ Pending |
 | Phase 1 tests | ⬜ Pending |
 | Phase 1 dual-build verification | ⬜ Pending |
@@ -272,7 +246,7 @@ Detailed per-phase plans with step-by-step implementation tracking:
 
 ---
 
-## 6. Test Strategy
+## 7. Test Strategy
 
 ### Test Organization
 - **Feature tests** — one test class per feature provider, using `InMemoryTransport` from lego-flow
@@ -284,14 +258,9 @@ Detailed per-phase plans with step-by-step implementation tracking:
 - AssertJ assertions — `assertThat(response).isInstanceOf(...)`
 - Tests import lego-flow WAMP classes directly
 
-### Required Test Coverage
-- Every RWAMP feature has dedicated tests
-- Integration tests verify RWAMP features work correctly on top of lego-flow components
-- Statistics verified with counters before/after operations
-
 ---
 
-## 7. Branch Strategy
+## 8. Branch Strategy
 
 | Branch | Purpose |
 |--------|---------|
@@ -300,26 +269,27 @@ Detailed per-phase plans with step-by-step implementation tracking:
 
 ---
 
-## 8. References
+## 9. References
 
 - **WAMP_NEXT_STEPS.md** — Original comparison document
 - **lego-flow WAMP** — `/Users/sergey.sidorov/work/projects/github/lego-flow/messaging/wamp` (basis)
 - **xLib WAMP** — `/Users/sergey.sidorov/work/projects/github/xLib` (feature reference only)
-- **lego-flow AGENTS.md** — Development practices to adopt
+- **lego-flow AGENTS.md** — Development practices adopted
+- **MDB-SQL** — `/Users/sergey.sidorov/work/projects/github/MDB-SQL` (dependency pattern reference)
 
 ---
 
-## 9. Effort Summary
+## 10. Effort Summary
 
 | Item | Days |
 |------|------|
+| Phase 0 — lego-flow changes | 2.25 |
 | Setup + scaffolding | 2 |
-| Proposed lego-flow changes (if approved) | 2.25 |
-| Phase 1 — Foundation (RWAMP) | 5 |
+| Phase 1 — Foundation (RWAMP) | 4 |
 | Phase 2 — Discovery & Identity | 13 |
 | Phase 3 — Integration | 14 |
 | Phase 4 — Polish | 5 |
 | Buffer (15%) | 6 |
-| **Total** | **47.25** |
+| **Total** | **46.25** |
 
-**~47 working days (6-8 weeks at 1 person)**
+**~46 working days (6-8 weeks at 1 person)**

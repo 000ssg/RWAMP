@@ -6,6 +6,11 @@
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 1. Goals
 
 After Phase 4, RWAMP has:
@@ -17,6 +22,11 @@ After Phase 4, RWAMP has:
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 2. Pattern-Based Registration
 
 **Package:** `ssg.rwamp.feature.registration`
@@ -26,7 +36,12 @@ that intercepts REGISTER and CALL messages.
 
 ### 2.1 Implementation
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `PatternRegistrationHandler` — intercepts REGISTER with `match` option | ⬜ Pending |
 | `match` option support: `"exact"` (default), `"prefix"`, `"wildcard"` | ⬜ Pending |
 | Pattern matching for procedure URIs (compatible with Broker's wildcard matching) | ⬜ Pending |
@@ -35,7 +50,12 @@ that intercepts REGISTER and CALL messages.
 
 ### 2.2 Tests
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `PatternRegistrationTest` — exact match (delegates to lego-flow Dealer) | ⬜ Pending |
 | `PatternRegistrationTest` — prefix match | ⬜ Pending |
 | `PatternRegistrationTest` — wildcard match | ⬜ Pending |
@@ -49,13 +69,23 @@ matches, it delegates to lego-flow's Dealer (exact match).
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 3. Registration Revocation
 
 **Package:** `ssg.rwamp.feature.registration`
 
 ### 3.1 Implementation
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `wamp.registration.revoke` procedure — revoke specific registration | ⬜ Pending |
 | Revoke sends INTERRUPT to callee (via lego-flow's `WampTransport`) | ⬜ Pending |
 | `wamp.registration.get` procedure — get registration details | ⬜ Pending |
@@ -64,7 +94,12 @@ matches, it delegates to lego-flow's Dealer (exact match).
 
 ### 3.2 Tests
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `RegistrationMetaTest` — revoke and verify callee affected | ⬜ Pending |
 | `RegistrationMetaTest` — get registration details | ⬜ Pending |
 | `RegistrationMetaTest` — list registrations | ⬜ Pending |
@@ -77,11 +112,21 @@ on the underlying Dealer.
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 4. Documentation
 
 ### 4.1 README.md
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | Final README — "RWAMP extends lego-flow's WAMP" | ⬜ Pending |
 | Architecture diagram (Mermaid) — show lego-flow as dependency, RWAMP as extensions | ⬜ Pending |
 | Feature table — WAMP Advanced Profile coverage | ⬜ Pending |
@@ -89,7 +134,12 @@ on the underlying Dealer.
 
 ### 4.2 doc/ARCHITECTURE.md
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | "Extension over lego-flow" — how RWAMP wraps/augments lego-flow components | ⬜ Pending |
 | Decorator/wrapper pattern — StatisticsRouter, PatternDealer, etc. | ⬜ Pending |
 | Meta procedure registration — how new procedures are wired into WampRouter | ⬜ Pending |
@@ -98,12 +148,22 @@ on the underlying Dealer.
 
 ### 4.3 doc/REQUIREMENTS.md
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | Per-phase requirement documentation | ⬜ Pending |
 | Feature design decisions — why wrapper vs. upstream change | ⬜ Pending |
 | Test coverage summary | ⬜ Pending |
 
 ---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
 
 ## 5. Phase 4 Completion Checklist
 
@@ -118,10 +178,20 @@ on the underlying Dealer.
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 6. Test Count Targets
 
 | Feature | Target Tests |
-|---------|-------------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).------|-------------|
 | Pattern Registration | 4+ |
 | Registration Meta | 4+ |
 | **Phase 4 Total** | **8+** |

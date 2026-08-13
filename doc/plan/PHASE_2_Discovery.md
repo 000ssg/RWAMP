@@ -6,6 +6,11 @@
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 1. Goals
 
 After Phase 2, RWAMP has:
@@ -17,6 +22,11 @@ All features built on top of lego-flow's `Broker`, `Dealer`, `Realm`, and `WampR
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 2. Reflection API
 
 **Package:** `ssg.rwamp.feature.reflection`
@@ -26,14 +36,24 @@ as local procedures with the Dealer via meta procedure registration.
 
 ### 2.1 Data Model
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `ReflectionRegistry` — per-realm registry for types, procedures, errors, topics | ⬜ Pending |
 | `ReflectionRegistry` reads from lego-flow's `Broker` (subscriptions) and `Dealer` (registrations) | ⬜ Pending |
 | `ReflectionRegistry` scoped by realm name | ⬜ Pending |
 
 ### 2.2 Procedures (registered as meta/local procedures)
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `wamp.reflection.topic.list` — list topics with subscribers | ⬜ Pending |
 | `wamp.reflection.topic.describe` — describe topics (subscriber count, retained events) | ⬜ Pending |
 | `wamp.reflection.procedure.list` — list registered procedures | ⬜ Pending |
@@ -44,7 +64,12 @@ as local procedures with the Dealer via meta procedure registration.
 
 ### 2.3 Event-Driven Reflection
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `wamp.reflect.define` topic handler — register type/procedure/error definitions | ⬜ Pending |
 | `wamp.reflect.describe` topic handler — request definitions | ⬜ Pending |
 | `wamp.reflect.on_define` event — published when something is defined | ⬜ Pending |
@@ -53,7 +78,12 @@ as local procedures with the Dealer via meta procedure registration.
 
 ### 2.4 Tests
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `ReflectionAPITest` — topic.list/topic.describe | ⬜ Pending |
 | `ReflectionAPITest` — procedure.list/procedure.describe | ⬜ Pending |
 | `ReflectionAPITest` — type.list/type.describe | ⬜ Pending |
@@ -68,6 +98,11 @@ maps at call time.
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 3. Testament API
 
 **Package:** `ssg.rwamp.feature.testament`
@@ -77,7 +112,12 @@ session close lifecycle.
 
 ### 3.1 Core Implementation
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `TestamentManager` — stores testaments per session (keyed by session ID) | ⬜ Pending |
 | Testament data: topic, args, kwargs, publish_options | ⬜ Pending |
 | Testament scope: `detached` vs `destroyed` | ⬜ Pending |
@@ -88,7 +128,12 @@ session close lifecycle.
 
 ### 3.2 Tests
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `TestamentTest` — add_testament, verify stored | ⬜ Pending |
 | `TestamentTest` — flush_testament, verify removed | ⬜ Pending |
 | `TestamentTest` — scope destroyed, publish on session close | ⬜ Pending |
@@ -104,6 +149,11 @@ a wrapper router.
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 4. Virtual Sessions
 
 **Package:** `ssg.rwamp.feature.virtual`
@@ -113,7 +163,12 @@ are lightweight — no transport, just identity.
 
 ### 4.1 Core Implementation
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `VirtualSessionManager` — manages virtual sessions per realm | ⬜ Pending |
 | `VirtualSession` — auth identity (authid, authrole, authmethod) + session ID | ⬜ Pending |
 | `virtual_session.register` procedure — allocate session ID, set auth, call `sessionJoined()` | ⬜ Pending |
@@ -123,7 +178,12 @@ are lightweight — no transport, just identity.
 
 ### 4.2 Tests
 | Task | Status |
-|------|--------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).---|--------|
 | `VirtualSessionTest` — register virtual session | ⬜ Pending |
 | `VirtualSessionTest` — virtual session appears in session meta (list/count/get) | ⬜ Pending |
 | `VirtualSessionTest` — on_join event published for virtual session | ⬜ Pending |
@@ -138,6 +198,11 @@ associated — they exist purely for identity mapping.
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 5. Phase 2 Completion Checklist
 
 - [ ] All modules compile with Maven
@@ -151,10 +216,20 @@ associated — they exist purely for identity mapping.
 
 ---
 
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).
+
 ## 6. Test Count Targets
 
 | Feature | Target Tests |
-|---------|-------------|
+|---
+
+## Dependency Note
+
+All modules in this phase depend on `ssg:lego-flow-wamp` via GitHub Packages.
+Follow the pattern established in Phase 1 (see PHASE_1_Foundation.md Step 1).------|-------------|
 | Reflection API | 10+ |
 | Testament API | 5+ |
 | Virtual Sessions | 6+ |
