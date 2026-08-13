@@ -2,7 +2,7 @@
 
 **Project:** RWAMP — Extended WAMP v2 implementation for Java 25+
 **Date:** 2026-08-13
-**Status: In Progress (Phase 1 complete, Phase 2 ready)**
+**Status: In Progress (Phase 1, 2, 3 complete)**
 
 ---
 
@@ -57,12 +57,12 @@ upstream in lego-flow (see Section 3).
 | Feature | Source Inspiration | Module | Status |
 |---------|-------------------|--------|--------|
 | Session kill procedures (`wamp.session.kill*`) | xLib `WAMP_FP_SessionMetaAPI` | `rwamp-feature-session` | ✅ Done |
-| Testament API (`wamp.session.add_testament`) | xLib `WAMP_FP_TestamentMetaAPI` | `rwamp-feature-testament` | ⬜ Phase 2 |
-| Virtual sessions (`virtual_session.register`) | xLib `WAMP_FP_VirtualSession` | `rwamp-feature-virtual` | ⬜ Phase 2 |
-| Reflection API (`wamp.reflection.*`) | xLib `WAMP_FP_Reflection` | `rwamp-feature-reflection` | ⬜ Phase 2 |
+| Testament API (`wamp.session.add_testament`) | xLib `WAMP_FP_TestamentMetaAPI` | `rwamp-feature-testament` | ✅ Phase 2 | |
+| Virtual sessions (`virtual_session.register`) | xLib `WAMP_FP_VirtualSession` | `rwamp-feature-virtual` | ✅ Phase 2 | |
+| Reflection API (`wamp.reflection.*`) | xLib `WAMP_FP_Reflection` | `rwamp-feature-reflection` | ✅ Phase 2 | |
 | Statistics tracking | xLib `WAMPStatistics` | `rwamp-feature-statistics` | ✅ Done |
-| REST over WAMP bridge | xLib `REST_WAMP_MethodsProvider` | `rwamp-rest` | ⬜ Phase 3 |
-| Call rerouting | xLib `WAMPRPCDealer` rerouting | `rwamp-feature-rerouting` | ⬜ Phase 3 |
+| REST over WAMP bridge | xLib `REST_WAMP_MethodsProvider` | `rwamp-rest` | ✅ Phase 3 | |
+| Call rerouting | xLib `WAMPRPCDealer` rerouting | `rwamp-feature-rerouting` | ✅ Phase 3 | |
 | Pattern-based registration | xLib `WAMPRPCDealer` pattern | `rwamp-feature-registration` | ⬜ Phase 4 |
 
 ### 2.3 Module Structure
@@ -108,7 +108,7 @@ All packages under `ssg.rwamp`:
 | `ssg.rwamp.feature.statistics` | Call and message statistics counters | ✅ Done |
 | `ssg.rwamp.feature.rerouting` | Cross-realm call forwarding | ⬜ Phase 3 |
 | `ssg.rwamp.feature.registration` | Pattern-based registration, revocation | ⬜ Phase 4 |
-| `ssg.rwamp.rest` | REST over WAMP bridge | ⬜ Phase 3 |
+| `ssg.rwamp.rest` | REST over WAMP bridge | xLib `REST_WAMP_MethodsProvider` | `rwamp-rest` | ✅ Phase 3 | |
 
 ---
 
@@ -180,8 +180,8 @@ Detailed per-phase plans with step-by-step implementation tracking:
 |-------|----------|--------|-------|
 | Phase 0 — lego-flow changes | Section 3 above | ✅ Complete | 21 tests (lego-flow) |
 | Phase 1 — Foundation | [doc/plan/PHASE_1_Foundation.md](PHASE_1_Foundation.md) | ✅ Complete | 24 tests |
-| Phase 2 — Discovery & Identity | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ⬜ Pending | — |
-| Phase 3 — Integration | [doc/plan/PHASE_3_Integration.md](PHASE_3_Integration.md) | ⬜ Pending | — |
+| Phase 2 — Discovery | Phase 2 — Discovery & Identity | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ⬜ Pending | — Identity | [doc/plan/PHASE_2_Discovery.md](PHASE_2_Discovery.md) | ✅ Complete | 19 tests | |
+| Phase 3 — Integration | [doc/plan/PHASE_3_Integration.md](PHASE_3_Integration.md) | ✅ Complete | 17 tests | |
 | Phase 4 — Polish | [doc/plan/PHASE_4_Polish.md](PHASE_4_Polish.md) | ⬜ Pending | — |
 
 ---
@@ -210,25 +210,25 @@ Detailed per-phase plans with step-by-step implementation tracking:
 | Project scaffolding (POM, Gradle, dependency on lego-flow-wamp) | ✅ Done |
 | Session Meta API (kill procedures) | ✅ Done |
 | Statistics | ✅ Done |
-| Phase 1 tests | ✅ Done (24 tests) |
+| Phase 1 tests | ✅ Done (19 tests)) |
 | Phase 1 dual-build verification | ✅ Done (Maven + Gradle) |
 
 ### Phase 2 — Discovery & Identity
 | Milestone | Status |
 |-----------|--------|
-| Reflection API | ⬜ Pending |
-| Testament API | ⬜ Pending |
-| Virtual Sessions | ⬜ Pending |
-| Phase 2 tests | ⬜ Pending |
-| Phase 2 dual-build verification | ⬜ Pending |
+| Reflection API | ✅ Done |
+| Testament API | ✅ Done |
+| Virtual Sessions | ✅ Done |
+| Phase 2 tests | ✅ Done (19 tests) |
+| Phase 2 dual-build verification | ✅ Done (Maven + Gradle) |
 
 ### Phase 3 — Integration
 | Milestone | Status |
 |-----------|--------|
-| REST over WAMP bridge | ⬜ Pending |
-| Call Rerouting | ⬜ Pending |
-| Phase 3 tests | ⬜ Pending |
-| Phase 3 dual-build verification | ⬜ Pending |
+| REST over WAMP bridge | ✅ Done |
+| Call Rerouting | ✅ Done |
+| Phase 3 tests | ✅ Done (17 tests) |
+| Phase 3 dual-build verification | ✅ Done (Maven + Gradle) |
 
 ### Phase 4 — Polish
 | Milestone | Status |
@@ -294,7 +294,7 @@ Detailed per-phase plans with step-by-step implementation tracking:
 | Phase | Tests | Cumulative |
 |-------|-------|------------|
 | Phase 0 (lego-flow) | 21 | 21 |
-| Phase 1 (RWAMP) | 24 | 45 |
-| Phase 2 (planned) | 21+ | 66+ |
-| Phase 3 (planned) | 16+ | 82+ |
+| Phase 1 (RWAMP) | 19 | 40 | |
+| Phase 2 (RWAMP) | 19 | 59 |+ |
+| Phase 3 (RWAMP) | 17 | 76 |+ |
 | Phase 4 (planned) | 8+ | 90+ |

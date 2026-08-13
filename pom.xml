@@ -16,6 +16,11 @@
     <modules>
         <module>rwamp-feature-session</module>
         <module>rwamp-feature-statistics</module>
+        <module>rwamp-feature-testament</module>
+        <module>rwamp-feature-reflection</module>
+        <module>rwamp-feature-virtual</module>
+        <module>rwamp-feature-rerouting</module>
+        <module>rwamp-rest</module>
     </modules>
 
     <properties>
@@ -34,6 +39,37 @@
                 <groupId>ssg</groupId>
                 <artifactId>lego-flow-wamp</artifactId>
                 <version>${lego-flow.version}</version>
+            </dependency>
+            <!-- RWAMP modules -->
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-session</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-statistics</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-testament</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-reflection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-virtual</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-rerouting</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <!-- Common -->
             <dependency>
@@ -76,6 +112,12 @@
     </build>
 
     <repositories>
+        <repository>
+            <id>local</id>
+            <url>${maven.repo.local}/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
         <repository>
             <id>github-lego-flow</id>
             <url>https://maven.pkg.github.com/000ssg/lego-flow</url>

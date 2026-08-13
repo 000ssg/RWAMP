@@ -16,11 +16,11 @@ WAMP implementations (xLib/Autobahn):
 |---------|--------|--------|
 | Session kill (`wamp.session.kill*`) | `rwamp-feature-session` | ✅ Phase 1 |
 | Statistics (`wamp.statistics.get`) | `rwamp-feature-statistics` | ✅ Phase 1 |
-| Testaments (`wamp.session.add_testament`) | `rwamp-feature-testament` | ⬜ Phase 2 |
-| Virtual sessions | `rwamp-feature-virtual` | ⬜ Phase 2 |
-| Reflection API (`wamp.reflection.*`) | `rwamp-feature-reflection` | ⬜ Phase 2 |
-| REST over WAMP | `rwamp-rest` | ⬜ Phase 3 |
-| Call rerouting | `rwamp-feature-rerouting` | ⬜ Phase 3 |
+| Testaments (`wamp.session.add_testament`) | `rwamp-feature-testament` | ✅ Phase 2 |
+| Virtual sessions | `rwamp-feature-virtual` | ✅ Phase 2 |
+| Reflection API (`wamp.reflection.*`) | `rwamp-feature-reflection` | ✅ Phase 2 |
+| REST over WAMP | `rwamp-rest` | ✅ Phase 3 |
+| Call rerouting | `rwamp-feature-rerouting` | ✅ Phase 3 |
 | Pattern registration | `rwamp-feature-registration` | ⬜ Phase 4 |
 
 ## Architecture
@@ -36,13 +36,19 @@ graph TD
         ST["rwamp-feature-statistics<br/>counters + transport wrapper"]
     end
 
-    subgraph "RWAMP Phase 2-4 ⬜"
-        T["rwamp-feature-testament"]
-        V["rwamp-feature-virtual"]
-        R["rwamp-feature-reflection"]
-        RR["rwamp-feature-rerouting"]
-        RG["rwamp-feature-registration"]
-        REST["rwamp-rest"]
+    subgraph "RWAMP Phase 2 ✅"
+        T["rwamp-feature-testament<br/>schedule events on session close"]
+        V["rwamp-feature-virtual<br/>identity mapping for HTTP users"]
+        R["rwamp-feature-reflection<br/>introspect procedures, topics"]
+    end
+
+    subgraph "RWAMP Phase 3 ✅"
+        REST["rwamp-rest<br/>HTTP-to-WAMP bridge"]
+        RR["rwamp-feature-rerouting<br/>cross-realm RPC forwarding"]
+    end
+
+    subgraph "RWAMP Phase 4 ⬜"
+        RG["rwamp-feature-registration<br/>pattern matching"]
     end
 
     S --> LF
@@ -50,10 +56,11 @@ graph TD
     T --> LF
     V --> LF
     R --> LF
-    RR --> LF
-    RG --> LF
     REST --> LF
     REST --> V
+    REST --> R
+    RR --> LF
+    RG --> LF
 ```
 
 ## Building
@@ -89,16 +96,16 @@ GitHub Packages (with `GITHUB_ACTOR`/`GITHUB_TOKEN`).
 
 ## Project Structure
 
-| Module | Package | Purpose | Status |
-|--------|---------|---------|--------|
-| `rwamp-feature-session` | `ssg.rwamp.feature.session` | Session kill procedures | ✅ |
-| `rwamp-feature-statistics` | `ssg.rwamp.feature.statistics` | Statistics counters | ✅ |
-| `rwamp-feature-testament` | `ssg.rwamp.feature.testament` | Testament scheduling | ⬜ |
-| `rwamp-feature-virtual` | `ssg.rwamp.feature.virtual` | Virtual session manager | ⬜ |
-| `rwamp-feature-reflection` | `ssg.rwamp.feature.reflection` | Introspection API | ⬜ |
-| `rwamp-feature-rerouting` | `ssg.rwamp.feature.rerouting` | Cross-realm forwarding | ⬜ |
-| `rwamp-feature-registration` | `ssg.rwamp.feature.registration` | Pattern matching | ⬜ |
-| `rwamp-rest` | `ssg.rwamp.rest` | REST over WAMP bridge | ⬜ |
+| Module | Package | Purpose | Tests |
+|--------|---------|---------|-------|
+| `rwamp-feature-session` | `ssg.rwamp.feature.session` | Session kill procedures | 9 |
+| `rwamp-feature-statistics` | `ssg.rwamp.feature.statistics` | Statistics counters | 10 |
+| `rwamp-feature-testament` | `ssg.rwamp.feature.testament` | Testament scheduling | 6 |
+| `rwamp-feature-virtual` | `ssg.rwamp.feature.virtual` | Virtual session manager | 6 |
+| `rwamp-feature-reflection` | `ssg.rwamp.feature.reflection` | Introspection API | 7 |
+| `rwamp-rest` | `ssg.rwamp.rest` | REST over WAMP bridge | 10 |
+| `rwamp-feature-rerouting` | `ssg.rwamp.feature.rerouting` | Cross-realm forwarding | 7 |
+| **Total** | | | **55** |
 
 ## Quick Start
 
@@ -113,22 +120,58 @@ SessionMetaApi.register(router, tracker);
 tracker.track(sessionId, transport);
 
 // Call wamp.session.kill from any session
-// router.route(new WampMessage.Call(requestId, options, "wamp.session.kill",
-//         List.of(targetSessionId)), callerTransport);
+router.route(new WampMessage.Call(requestId, options, "wamp.session.kill",
+        List.of(targetSessionId)), callerTransport);
 ```
 
-### Statistics
+### Reflection API
 
 ```java
 var router = new WampRouter();
-var stats = new WampStatistics();
-StatisticsApi.register(router, stats);
+var registry = ReflectionApi.createRegistry(router);
+ReflectionApi.register(router, registry);
 
-// Wrap transports to count messages
-var group = stats.group("myRealm");
-var countingTransport = new StatisticsTransport(rawTransport, group);
+// Query available procedures
+router.route(new WampMessage.Call(1, Map.of(), "wamp.reflection.procedure.list", null), transport);
+// → Result with list of registered procedure URIs
+```
 
-// Query: call wamp.statistics.get → returns counter snapshot
+### REST over WAMP
+
+```java
+var router = new WampRouter();
+var realm = new Realm("realm1");
+var virtualManager = new VirtualSessionManager(realm);
+var registry = ReflectionApi.createRegistry(router);
+
+VirtualSessionApi.register(router, realm, virtualManager);
+ReflectionApi.register(router, registry);
+
+var bridge = new RestWampBridge(router, virtualManager, registry);
+
+// Map HTTP request to WAMP call
+var request = new RestRequest("GET", "/com/example/greet",
+        List.of("World"), Map.of("authid", "user1"), null);
+var response = bridge.handle(request);
+// → RestResponse(200, ["Hello, World!"])
+```
+
+### Call Rerouting
+
+```java
+var realmManager = new RealmManager();
+realmManager.createRealm("realm1");
+realmManager.createRealm("realm2");
+
+var router = new WampRouter();
+ReroutingApi.register(router, realmManager);
+
+// Call with reroute option to forward to another realm
+var reroute = new LinkedHashMap<String, Object>();
+reroute.put("realm", "realm2");
+reroute.put("procedure", "com.example.add");
+var options = new LinkedHashMap<String, Object>();
+options.put("reroute", reroute);
 ```
 
 ## Development
