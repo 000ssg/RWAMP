@@ -24,12 +24,7 @@ RWAMP depends on lego-flow's WAMP module via **GitHub Packages** or **local Mave
 ssg:lego-flow-wamp:0.2.0-SNAPSHOT
 ```
 
-Both Maven and Gradle builds resolve from:
-```
-https://maven.pkg.github.com/000ssg/lego-flow
-```
-
-Authentication uses `GITHUB_ACTOR` / `GITHUB_TOKEN` environment variables.
+RWAMP version is **0.1.0-SNAPSHOT** (lego-flow stays at 0.2.0-SNAPSHOT).
 
 For local development, install lego-flow to Maven local:
 ```bash
@@ -38,16 +33,17 @@ cd /path/to/lego-flow && mvn install -DskipTests
 
 ### Pre-Approved Build Commands
 
-**Maven:**
-```bash
-mvn compile -DskipTests
-mvn test
-```
-
-**Gradle:**
+**Gradle (primary):**
 ```bash
 ./gradlew compileJava
 ./gradlew test
+./gradlew clean test jacocoAggregateVerification --no-daemon
+```
+
+**Maven (secondary):**
+```bash
+mvn compile -DskipTests
+mvn test
 ```
 
 ### Structural Rules
@@ -56,7 +52,7 @@ mvn test
 2. **Decorator/wrapper patterns** — extend lego-flow components without subclassing
 3. **Each feature in its own module** — clean separation, independent compilation
 4. **lego-flow WAMP is a dependency, not a sibling module** — always reference as `ssg:lego-flow-wamp`
-5. **Published artifact names must be unique** on GitHub Packages (no `ssg.rwamp` groupId conflicts)
+5. **Published artifact names must be unique** on GitHub Packages
 6. **Follow lego-flow's design patterns**: sealed interfaces, records, virtual threads, AssertJ assertions
 7. **InMemoryTransport is local** — lego-flow's InMemoryTransport is in test sources and not
    available as a transitive dependency; create a local copy in each module's test sources
@@ -68,10 +64,73 @@ mvn test
 
 ### 1. Requirements Documentation
 
-**Primary Rule:** All requirements and design decisions MUST be tracked in `doc/plan/PLAN.md`
-and per-phase documents in `doc/plan/PHASE_*.md`.
+**Primary Rule:** All requirements, design decisions, and their evolution MUST be tracked in `doc/REQUIREMENTS.md`.
 
-### 2. Git Commit Practices
+#### When Adding Features:
+1. **Document Original Request**: Add verbatim user request at the start of each commit section
+2. **Reformulate Requirements**: List clear, specific technical requirements
+3. **Final Design Decisions**: Document what was chosen and why
+4. **Implementation Details**: List files changed, features added
+5. **Test Coverage**: Document tests added and total test count
+
+#### REQUIREMENTS.md Structure:
+```markdown
+## Commit: `<hash>` - <Feature Name> (Date)
+
+### Original Request
+> "verbatim user request from conversation or discussion transcript"
+
+### Reformulated Requirements
+1. Specific technical requirement
+2. Another requirement
+...
+
+### Final Design Decisions
+- Architectural choices with rationale
+- Trade-offs considered
+
+### Implementation Details
+- Files modified/created
+- Key features implemented
+
+### Test Coverage
+- New tests added
+- Total tests passing
+
+### Cost Estimate
+| Metric | Value |
+|--------|-------|
+| Files created/modified | N |
+| Lines added/removed | +A / -B |
+| Tests added | N (total: M) |
+```
+
+### 2. Architecture Documentation
+
+**ARCHITECTURE.md** (`doc/ARCHITECTURE.md`) documents the **current** set of architectural decisions.
+
+- **Mandatory update** on every commit with architectural changes
+- Unlike REQUIREMENTS.md (append-only, historical), ARCHITECTURE.md is **edited in place** to reflect the latest state
+- Sections: module purpose, key abstractions, design patterns, data flow, extension points, thread safety model
+
+### 3. Code Overview Documentation
+
+**CODE_OVERVIEW.md** (`doc/CODE_OVERVIEW.md`) documents the source structure and key classes.
+
+- Maintained at the root level and per-module level
+- Lists source structure with file-by-file descriptions
+- Documents key abstractions and design decisions
+- Cross-references README, Architecture, and Requirements
+
+### 4. Compliance Documentation
+
+**COMPLIANCE.md** (`doc/COMPLIANCE.md`) documents WAMP specification compliance per module.
+
+- Lists WAMP spec sections implemented
+- Notes known deviations
+- Per-module compliance files in each module's `doc/` directory
+
+### 5. Git Commit Practices
 
 #### Commit Message Format:
 ```
@@ -80,20 +139,96 @@ and per-phase documents in `doc/plan/PHASE_*.md`.
 <Detailed description of changes>
 
 - Bullet points for key changes
+- Implementation highlights
+- Test additions
+
+Co-Authored-By: AI assistant
 ```
 
 #### Commit Workflow:
 1. Stage changes: `git add <files>`
-2. Commit with detailed message
-3. Update plan tracking checkboxes in `doc/plan/` documents
-4. **NEVER run `git push` automatically.** Inform the user and wait for explicit instruction.
+2. Commit with detailed message using heredoc for proper formatting
+3. Always include `Co-Authored-By: AI assistant`
+4. **Update doc/REQUIREMENTS.md** with commit documentation
+5. **Update doc/ARCHITECTURE.md** if architectural changes were made
+6. **Update README.md**: reflect any API changes, new features, updated module structure, version badges, test counts
+7. **NEVER run `git push` automatically.** Inform the user and wait for explicit instruction.
 
-### 3. Branch Strategy
+> **MANDATORY DOCUMENTATION RULE**: Steps 4–6 are required on every commit with code changes.
+> Documentation-first development: requirements are documented before implementation.
 
-| Branch | Purpose |
-|--------|---------|
-| `master` | Clean main branch |
-| `prototype` | All development; implementation commits |
+---
+
+## Documentation & Graphics Guidelines
+
+### Mermaid Graphics (REQUIRED)
+Always use Mermaid diagrams instead of ASCII graphics. ASCII diagrams are deprecated and should be replaced with Mermaid equivalents in all documentation files (README.md, doc/*.md, AGENTS.md).
+
+Use Mermaid `graph TD` or `graph LR` for architecture diagrams. Use Mermaid sequence diagrams for protocol flows. Mermaid is supported natively by GitHub, GitLab, VS Code, and all major markdown renderers.
+
+### Documentation Update Checklist
+Before committing changes that affect code structure:
+1. Update README.md: Performance section, module table, architecture diagram, test counts
+2. Update doc/ARCHITECTURE.md: Update Mermaid diagrams if module structure changed
+3. Update doc/REQUIREMENTS.md: Add commit entry with all sections
+4. Update doc/CODE_OVERVIEW.md: Update source structure if files changed
+5. Update per-module docs: README, ARCHITECTURE, REQUIREMENTS, COMPLIANCE, CODE_OVERVIEW
+
+### Per-Module Documentation Structure
+Each RWAMP module must have:
+```
+<module>/
+├── README.md                    — module overview, usage, API table, cross-refs
+└── doc/
+    ├── ARCHITECTURE.md          — module purpose, abstractions, data flow, thread safety
+    ├── REQUIREMENTS.md          — requirements timeline, phase, test count
+    ├── CODE_OVERVIEW.md         — source structure, key classes, design notes
+    └── COMPLIANCE.md            — WAMP spec compliance, known deviations
+```
+
+---
+
+## Test Strategy
+
+- **Feature tests** — one test class per feature, using local `InMemoryTransport`
+- **Integration tests** — end-to-end flows using WebSocket transport from lego-flow
+- **No duplicate tests for re-used components** — lego-flow tests cover the core
+- **AssertJ assertions** — follow lego-flow's testing style
+- **InMemoryTransport** — create a local copy in each module's test sources (lego-flow's
+  is in test scope and unavailable as a transitive dependency)
+- **Separate transport pairs** — when testing router interactions, use separate InMemoryTransport
+  pairs for different sessions to avoid message cross-contamination
+- **JaCoCo coverage** — aggregate target 80%+, per-module minimum 50%
+
+---
+
+## Module Structure
+
+Each RWAMP feature module:
+- Has its own `pom.xml` and is configured via root `build.gradle.kts`
+- Depends on `ssg:lego-flow-wamp`
+- Uses `ssg.rwamp.<category>.<name>` package
+- Has dedicated tests with local `InMemoryTransport`
+- Has `README.md` and `doc/` directory with ARCHITECTURE, REQUIREMENTS, CODE_OVERVIEW, COMPLIANCE
+
+See [doc/plan/PLAN.md](doc/plan/PLAN.md) for the complete module dependency graph.
+
+---
+
+## New Module Template
+
+When adding a new feature module (e.g., `rwamp-feature-<name>`):
+
+1. Create directory: `rwamp-feature-<name>/src/main/java/ssg/rwamp/feature/<name>/`
+2. Create directory: `rwamp-feature-<name>/src/test/java/ssg/rwamp/feature/<name>/`
+3. Create directory: `rwamp-feature-<name>/doc/`
+4. Add `pom.xml` (following `rwamp-feature-session/pom.xml` pattern)
+5. Add to `settings.gradle.kts` include list
+6. Copy `InMemoryTransport.java` from an existing module's test sources
+7. Create `README.md` with usage, API table, cross-refs
+8. Create `doc/ARCHITECTURE.md`, `doc/REQUIREMENTS.md`, `doc/CODE_OVERVIEW.md`, `doc/COMPLIANCE.md`
+9. Implement feature classes and tests
+10. Verify: `./gradlew test jacocoAggregateVerification --no-daemon`
 
 ---
 
@@ -159,7 +294,7 @@ subprojects {
     }
 
     dependencies {
-        "implementation"("ssg:lego-flow-wamp:0.2.0-SNAPSHOT")
+        "implementation"("ssg:lego-flow-wamp:$legoFlowVersion")
     }
 }
 ```
@@ -173,47 +308,19 @@ Both Maven and Gradle builds must pass before reporting changes as verified.
 
 ---
 
-## Documentation & Graphics Guidelines
+## Branch Strategy
 
-### Mermaid Graphics (REQUIRED)
-Always use Mermaid diagrams instead of ASCII graphics. ASCII diagrams are deprecated
-and should be replaced with Mermaid equivalents in all documentation files.
-
----
-
-## Test Strategy
-
-- **Feature tests** — one test class per feature, using local `InMemoryTransport`
-- **Integration tests** — end-to-end flows using WebSocket transport from lego-flow
-- **No duplicate tests for re-used components** — lego-flow tests cover the core
-- **AssertJ assertions** — follow lego-flow's testing style
-- **InMemoryTransport** — create a local copy in each module's test sources (lego-flow's
-  is in test scope and unavailable as a transitive dependency)
-- **Separate transport pairs** — when testing router interactions, use separate InMemoryTransport
-  pairs for different sessions to avoid message cross-contamination
+| Branch | Purpose |
+|--------|---------|
+| `master` | Clean main branch |
+| `prototype` | All development; implementation commits |
 
 ---
 
-## Module Structure
+## Versioning
 
-Each RWAMP feature module:
-- Has its own `pom.xml` (no `build.gradle.kts` — root build.gradle.kts configures subprojects)
-- Depends on `ssg:lego-flow-wamp`
-- Uses `ssg.rwamp.feature.<name>` package
-- Has dedicated tests with local `InMemoryTransport`
+| Project | Version |
+|---------|---------|
+| lego-flow | 0.2.0-SNAPSHOT (upstream, not changed by RWAMP) |
+| RWAMP | 0.1.0-SNAPSHOT |
 
-See `doc/plan/PLAN.md` for the complete module dependency graph.
-
----
-
-## New Module Template
-
-When adding a new feature module (e.g., `rwamp-feature-testament`):
-
-1. Create directory: `rwamp-feature-<name>/src/main/java/ssg/rwamp/feature/<name>/`
-2. Create directory: `rwamp-feature-<name>/src/test/java/ssg/rwamp/feature/<name>/`
-3. Add `pom.xml` (following `rwamp-feature-session/pom.xml` pattern)
-4. Add to `settings.gradle.kts` include list
-5. Copy `InMemoryTransport.java` from an existing module's test sources
-6. Implement feature classes and tests
-7. Verify: `mvn test` and `./gradlew test`
