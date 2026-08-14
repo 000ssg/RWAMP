@@ -8,5 +8,6 @@ include(
     "rwamp-feature-virtual",
     "rwamp-feature-rerouting",
     "rwamp-rest",
-    "rwamp-feature-registration"
+    "rwamp-feature-registration",
+    "rwamp-demos"
 )
