@@ -38,6 +38,7 @@ WAMP implementations (xLib/Autobahn):
 | REST over WAMP | `rwamp-rest` | 3 | ✅ Done |
 | Call rerouting | `rwamp-feature-rerouting` | 3 | ✅ Done |
 | Pattern registration | `rwamp-feature-registration` | 4 | ✅ Done |
+| Usage demos & examples | `rwamp-demos` | — | ✅ Done |
 
 ---
 
@@ -69,6 +70,10 @@ graph TD
         RG["rwamp-feature-registration<br/>pattern matching, revocation"]
     end
 
+    subgraph "RWAMP Demos"
+        DM["rwamp-demos<br/>14 usage scenarios with pros/cons"]
+    end
+
     S --> LF
     ST --> LF
     T --> LF
@@ -79,6 +84,14 @@ graph TD
     REST --> R
     RR --> LF
     RG --> LF
+    DM --> S
+    DM --> ST
+    DM --> T
+    DM --> V
+    DM --> R
+    DM --> REST
+    DM --> RR
+    DM --> RG
 ```
 
 ---
@@ -95,6 +108,7 @@ graph TD
 | `rwamp-rest` | `ssg.rwamp.rest` | REST over WAMP bridge | 10 | 81.1% |
 | `rwamp-feature-rerouting` | `ssg.rwamp.feature.rerouting` | Cross-realm forwarding | 7 | 59.1% |
 | `rwamp-feature-registration` | `ssg.rwamp.feature.registration` | Pattern registration & revocation | 31 | 92.9% |
+| `rwamp-demos` | `ssg.rwamp.demo` | Usage examples & scenarios | n/a | n/a |
 | **Total** | | | **92** | **86.9%** |
 
 ---
@@ -286,6 +300,7 @@ Coverage by module:
 | [rest](rwamp-rest/) | [README](rwamp-rest/README.md) | [Architecture](rwamp-rest/doc/ARCHITECTURE.md) | [Requirements](rwamp-rest/doc/REQUIREMENTS.md) | [Code Overview](rwamp-rest/doc/CODE_OVERVIEW.md) | [Compliance](rwamp-rest/doc/COMPLIANCE.md) |
 | [rerouting](rwamp-feature-rerouting/) | [README](rwamp-feature-rerouting/README.md) | [Architecture](rwamp-feature-rerouting/doc/ARCHITECTURE.md) | [Requirements](rwamp-feature-rerouting/doc/REQUIREMENTS.md) | [Code Overview](rwamp-feature-rerouting/doc/CODE_OVERVIEW.md) | [Compliance](rwamp-feature-rerouting/doc/COMPLIANCE.md) |
 | [registration](rwamp-feature-registration/) | [README](rwamp-feature-registration/README.md) | [Architecture](rwamp-feature-registration/doc/ARCHITECTURE.md) | [Requirements](rwamp-feature-registration/doc/REQUIREMENTS.md) | [Code Overview](rwamp-feature-registration/doc/CODE_OVERVIEW.md) | [Compliance](rwamp-feature-registration/doc/COMPLIANCE.md) |
+| [demos](rwamp-demos/) | [README](rwamp-demos/README.md) | [Architecture](rwamp-demos/doc/ARCHITECTURE.md) | [Requirements](rwamp-demos/doc/REQUIREMENTS.md) | [Code Overview](rwamp-demos/doc/CODE_OVERVIEW.md) | n/a |
 
 ---
 
