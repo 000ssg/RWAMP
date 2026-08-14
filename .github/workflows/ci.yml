@@ -1,0 +1,205 @@
+# RWAMP — CI/CD Pipeline (Gradle-based)
+# Builds, tests, and validates all 8 modules with coverage gates.
+#
+# Build strategy:
+#   • Gradle handles everything: compile + unit tests + JaCoCo coverage reports
+#   • lego-flow is installed to local Maven as a dependency
+#   • Coverage verified at per-module (50%) and aggregate (80%) levels
+#
+# Conditional execution:
+#   Set `skip-coverage` label on PR to skip coverage gate
+#   Set `run-windows` label on PR to enable slow Windows build (disabled by default)
+
+name: CI
+
+on:
+  push:
+    branches: [prototype, master]
+  pull_request:
+    branches: [master, prototype]
+
+permissions:
+  contents: read
+
+jobs:
+  # ──────────────────────────────────────────────
+  # 1. Build & Test — Gradle (fast compile + unit tests)
+  #    --rerun-tasks ensures JaCoCo agent generates .exec files every time
+  # ──────────────────────────────────────────────
+  build:
+    name: "Build & Test (${{ matrix.os }}, Java ${{ matrix.java }})"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        java: [25]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # ── Java runtime ─────────────────────────
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          cache: gradle
+
+      # ── Gradle build cache for dependency repository ──
+      - name: Cache Gradle user home
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-caches-
+
+      # ── Maven cache for lego-flow local install ──
+      - name: Cache lego-flow local Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/ssg
+          key: ${{ runner.os }}-m2-legoflow-${{ hashFiles('**/build.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-legoflow-
+
+      # ── Install lego-flow to local Maven ──
+      - name: Install lego-flow to local Maven
+        run: |
+          cd /tmp
+          git clone https://github.com/000ssg/lego-flow.git --depth 1
+          cd lego-flow
+          mvn install -DskipTests -pl messaging/wamp -am
+
+      # ── Compile + test with Gradle (with JaCoCo instrumentation) ───────────────
+      - name: Compile and run unit tests
+        run: |
+          ./gradlew clean compileJava test \
+            --parallel \
+            --rerun-tasks \
+            --no-daemon
+        env:
+          CI: true
+
+      # ── Upload test results (Gradle format) ───────────────────────────
+      - name: Upload test results
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-results-${{ matrix.os }}
+          path: "**/build/reports/tests/test/index.html"
+          retention-days: 30
+
+  # ──────────────────────────────────────────────
+  # 1b. Windows Build (opt-in via label, disabled by default — 2× slower)
+  #     Activate on PR by adding the 'run-windows' label.
+  # ──────────────────────────────────────────────
+  build-windows:
+    name: "Build & Test (windows-latest, Java 25)"
+    runs-on: windows-latest
+    if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'run-windows') }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Cache Gradle user home
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-caches-
+
+      - name: Cache lego-flow local Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/ssg
+          key: ${{ runner.os }}-m2-legoflow-${{ hashFiles('**/build.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-legoflow-
+
+      - name: Install lego-flow to local Maven
+        run: |
+          cd $env:TEMP
+          git clone https://github.com/000ssg/lego-flow.git --depth 1
+          cd lego-flow
+          mvn install -DskipTests -pl messaging/wamp -am
+
+      - name: Compile and run unit tests
+        run: .\gradlew.bat clean compileJava test --parallel --rerun-tasks --no-daemon
+        env:
+          CI: true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-results-windows
+          path: "**/build/reports/tests/test/index.html"
+          retention-days: 30
+
+  # ──────────────────────────────────────────────
+  # 2. Coverage Gate — Gradle (HTML + XML JaCoCo reports)
+  #    Verifies per-module (50%) and aggregate (80%) line coverage.
+  #    Can be skipped by adding 'skip-coverage' label on PR.
+  # ──────────────────────────────────────────────
+  coverage-gate:
+    name: "Coverage Gate"
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-coverage') }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Cache Gradle user home
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-caches-
+
+      - name: Cache lego-flow local Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/ssg
+          key: ${{ runner.os }}-m2-legoflow-${{ hashFiles('**/build.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-legoflow-
+
+      - name: Install lego-flow to local Maven
+        run: |
+          cd /tmp
+          git clone https://github.com/000ssg/lego-flow.git --depth 1
+          cd lego-flow
+          mvn install -DskipTests -pl messaging/wamp -am
+
+      - name: Verify coverage
+        run: ./gradlew jacocoTestCoverageVerification jacocoAggregateReport --no-daemon --rerun-tasks
+        env:
+          CI: true
+
+      # ── Upload JaCoCo HTML report for review ──────────────────────────
+      - name: Upload JaCoCo report
+        uses: actions/upload-artifact@v5
+        with:
+          name: jacoco-report
+          path: build/jacoco/aggregate/html/
+          retention-days: 30

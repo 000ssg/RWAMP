@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ssg</groupId>
+    <artifactId>rwamp</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>RWAMP — Extended WAMP v2 Implementation</name>
+    <description>RWAMP extends lego-flow's WAMP implementation with production-grade features from xLib's WAMP</description>
+    <url>https://github.com/000ssg/RWAMP</url>
+
+    <modules>
+        <module>rwamp-feature-session</module>
+        <module>rwamp-feature-statistics</module>
+        <module>rwamp-feature-testament</module>
+        <module>rwamp-feature-reflection</module>
+        <module>rwamp-feature-virtual</module>
+        <module>rwamp-feature-rerouting</module>
+        <module>rwamp-rest</module>
+        <module>rwamp-feature-registration</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <lego-flow.version>0.2.0-SNAPSHOT</lego-flow.version>
+        <junit.version>5.11.4</junit.version>
+        <assertj.version>3.27.3</assertj.version>
+        <slf4j.version>2.0.16</slf4j.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- lego-flow WAMP core -->
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>lego-flow-wamp</artifactId>
+                <version>${lego-flow.version}</version>
+            </dependency>
+            <!-- RWAMP modules -->
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-session</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-statistics</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-testament</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-reflection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-virtual</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-rerouting</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-feature-registration</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- Common -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <!-- Test -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>25</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>local</id>
+            <url>${maven.repo.local}/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+        <repository>
+            <id>github-lego-flow</id>
+            <url>https://maven.pkg.github.com/000ssg/lego-flow</url>
+        </repository>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+    </repositories>
+</project>
