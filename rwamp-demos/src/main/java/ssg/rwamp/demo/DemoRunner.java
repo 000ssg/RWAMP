@@ -7,11 +7,7 @@ import ssg.rwamp.demo.composite.MultiClientRpcDemo;
 import ssg.rwamp.demo.composite.MultiRealmDemo;
 import ssg.rwamp.demo.composite.MultiTopicPubSubDemo;
 import ssg.rwamp.demo.composite.SharedRegistrationDemo;
-import ssg.rwamp.demo.feature.RestBridgeDemo;
-import ssg.rwamp.demo.feature.ReflectionDemo;
-import ssg.rwamp.demo.feature.StatisticsDemo;
-import ssg.rwamp.demo.feature.TestamentDemo;
-import ssg.rwamp.demo.feature.VirtualSessionDemo;
+import ssg.rwamp.demo.feature.*;
 import ssg.rwamp.demo.simple.SessionManagementDemo;
 import ssg.rwamp.demo.simple.SimplePubSubDemo;
 import ssg.rwamp.demo.simple.SimpleRpcDemo;
@@ -26,22 +22,6 @@ import ssg.rwamp.demo.simple.SimpleRpcDemo;
  * <pre>{@code
  * DemoRunner.runAll();
  * }</pre>
- *
- * @see SimpleRpcDemo
- * @see SimplePubSubDemo
- * @see SessionManagementDemo
- * @see MultiClientRpcDemo
- * @see MultiTopicPubSubDemo
- * @see MultiRealmDemo
- * @see SharedRegistrationDemo
- * @see TestamentDemo
- * @see ReflectionDemo
- * @see StatisticsDemo
- * @see VirtualSessionDemo
- * @see RestBridgeDemo
- * @see MultiRouterDemo
- * @see MultiVersionApiDemo
- * @see CompositeScenarioDemo
  *
  * @since 0.1.0
  */
@@ -59,18 +39,27 @@ public final class DemoRunner {
         System.out.println("╚══════════════════════════════════════════════════════════╝");
         System.out.println();
 
+        // Simple demos
         run("Simple RPC", SimpleRpcDemo::main);
         run("Simple Pub/Sub", SimplePubSubDemo::main);
         run("Session Management", SessionManagementDemo::main);
+
+        // Composite demos
         run("Multi-Client RPC", MultiClientRpcDemo::main);
         run("Multi-Topic Pub/Sub", MultiTopicPubSubDemo::main);
         run("Multi-Realm", MultiRealmDemo::main);
         run("Shared Registration", SharedRegistrationDemo::main);
+
+        // Feature demos
         run("Testament", TestamentDemo::main);
         run("Reflection API", ReflectionDemo::main);
         run("Statistics", StatisticsDemo::main);
         run("Virtual Sessions", VirtualSessionDemo::main);
         run("REST Bridge", RestBridgeDemo::main);
+        run("API Providers", ApiProvidersDemo::main);
+        run("API Publishers", ApiPublishersDemo::main);
+
+        // Advanced demos
         run("Multi-Router", MultiRouterDemo::main);
         run("Multi-Version API", MultiVersionApiDemo::main);
         run("Composite Scenario", CompositeScenarioDemo::main);
@@ -98,6 +87,8 @@ public final class DemoRunner {
             case "statistics" -> StatisticsDemo.main(new String[0]);
             case "virtual" -> VirtualSessionDemo.main(new String[0]);
             case "rest" -> RestBridgeDemo.main(new String[0]);
+            case "providers" -> ApiProvidersDemo.main(new String[0]);
+            case "publishers" -> ApiPublishersDemo.main(new String[0]);
             case "multi-router" -> MultiRouterDemo.main(new String[0]);
             case "multi-version" -> MultiVersionApiDemo.main(new String[0]);
             case "composite" -> CompositeScenarioDemo.main(new String[0]);

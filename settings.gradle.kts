@@ -9,5 +9,7 @@ include(
     "rwamp-feature-rerouting",
     "rwamp-rest",
     "rwamp-feature-registration",
+    "rwamp-api-providers",
+    "rwamp-api-publishers",
     "rwamp-demos"
 )
