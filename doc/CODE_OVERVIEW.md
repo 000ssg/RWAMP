@@ -197,7 +197,7 @@ Pattern-based procedure registration with exact, prefix, and wildcard matching. 
 - **Feature tests** — one test class per feature provider, paired transports
 - **AssertJ assertions** — `assertThat(result).isInstanceOf(...)`
 - **No transport cross-contamination** — separate InMemoryTransport pairs per session
-- **Aggregate JaCoCo coverage** — 86.9% across all modules (80% gate in CI)
+- **Aggregate JaCoCo coverage** — 91.6% across all modules (80% gate in CI)
 
 ---
 
@@ -225,3 +225,7 @@ All packages under `ssg.rwamp`:
 | `ssg.rwamp.rest` | rwamp-rest |
 | `ssg.rwamp.feature.rerouting` | rwamp-feature-rerouting |
 | `ssg.rwamp.feature.registration` | rwamp-feature-registration |
+| `ssg.rwamp.api.provider` | rwamp-api-providers |
+| `ssg.rwamp.api.publisher` | rwamp-api-publishers |
+| `ssg.rwamp.api.webservices` | rwamp-api-web-services |
+| `ssg.rwamp.demo` | rwamp-demos |

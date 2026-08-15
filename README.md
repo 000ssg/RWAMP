@@ -3,8 +3,8 @@
 [![Java](https://img.shields.io/badge/Java-25%2B-orange.svg)](https://www.oracle.com/java/)
 [![Gradle](https://img.shields.io/badge/Gradle-9.x-green.svg)](https://gradle.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-92-brightgreen.svg)]()
-[![Coverage](https://img.shields.io/badge/Coverage-86.9%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-270-brightgreen.svg)]()
+[![Coverage](https://img.shields.io/badge/Coverage-92%25-brightgreen.svg)]()
 [![Version](https://img.shields.io/badge/Version-0.1.0-SNAPSHOT-blue.svg)]()
 
 Production-grade WAMP v2 extension built on **lego-flow's WAMP implementation**.
@@ -38,6 +38,9 @@ WAMP implementations (xLib/Autobahn):
 | REST over WAMP | `rwamp-rest` | 3 | ✅ Done |
 | Call rerouting | `rwamp-feature-rerouting` | 3 | ✅ Done |
 | Pattern registration | `rwamp-feature-registration` | 4 | ✅ Done |
+| API providers | `rwamp-api-providers` | 5 | ✅ Done |
+| API publishers | `rwamp-api-publishers` | 5 | ✅ Done |
+| Web-services scanning | `rwamp-api-web-services` | 5 | ✅ Done |
 | Usage demos & examples | `rwamp-demos` | — | ✅ Done |
 
 ---
@@ -70,6 +73,12 @@ graph TD
         RG["rwamp-feature-registration<br/>pattern matching, revocation"]
     end
 
+    subgraph "RWAMP Phase 5 ✅"
+        AP["rwamp-api-providers<br/>reflection-based API discovery"]
+        AU["rwamp-api-publishers<br/>OpenAPI, WAMP, HTML publishing"]
+        WS["rwamp-api-web-services<br/>JAX-RS annotation scanning"]
+    end
+
     subgraph "RWAMP Demos"
         DM["rwamp-demos<br/>14 usage scenarios with pros/cons"]
     end
@@ -84,6 +93,9 @@ graph TD
     REST --> R
     RR --> LF
     RG --> LF
+    AP --> LF
+    AU --> AP
+    WS --> AP
     DM --> S
     DM --> ST
     DM --> T
@@ -92,6 +104,9 @@ graph TD
     DM --> REST
     DM --> RR
     DM --> RG
+    DM --> AP
+    DM --> AU
+    DM --> WS
 ```
 
 ---
@@ -100,16 +115,19 @@ graph TD
 
 | Module | Package | Purpose | Tests | Coverage |
 |--------|---------|---------|-------|----------|
-| `rwamp-feature-session` | `ssg.rwamp.feature.session` | Session kill procedures | 14 | 89.2% |
-| `rwamp-feature-statistics` | `ssg.rwamp.feature.statistics` | Statistics counters | 12 | 95.5% |
-| `rwamp-feature-testament` | `ssg.rwamp.feature.testament` | Testament scheduling | 6 | 93.5% |
-| `rwamp-feature-virtual` | `ssg.rwamp.feature.virtual` | Virtual session manager | 6 | 93.3% |
-| `rwamp-feature-reflection` | `ssg.rwamp.feature.reflection` | Introspection API | 7 | 87.4% |
-| `rwamp-rest` | `ssg.rwamp.rest` | REST over WAMP bridge | 10 | 81.1% |
-| `rwamp-feature-rerouting` | `ssg.rwamp.feature.rerouting` | Cross-realm forwarding | 7 | 59.1% |
-| `rwamp-feature-registration` | `ssg.rwamp.feature.registration` | Pattern registration & revocation | 31 | 92.9% |
+| `rwamp-feature-session` | `ssg.rwamp.feature.session` | Session kill procedures | 12 | 91% |
+| `rwamp-feature-statistics` | `ssg.rwamp.feature.statistics` | Statistics counters | 12 | 94% |
+| `rwamp-feature-testament` | `ssg.rwamp.feature.testament` | Testament scheduling | 6 | 92% |
+| `rwamp-feature-virtual` | `ssg.rwamp.feature.virtual` | Virtual session manager | 6 | 94% |
+| `rwamp-feature-reflection` | `ssg.rwamp.feature.reflection` | Introspection API | 12 | 87% |
+| `rwamp-rest` | `ssg.rwamp.rest` | REST over WAMP bridge | 10 | 80% |
+| `rwamp-feature-rerouting` | `ssg.rwamp.feature.rerouting` | Cross-realm forwarding | 30 | 95% |
+| `rwamp-feature-registration` | `ssg.rwamp.feature.registration` | Pattern registration & revocation | 31 | 93% |
+| `rwamp-api-providers` | `ssg.rwamp.api.provider` | Reflection-based API discovery | 51 | 96% |
+| `rwamp-api-publishers` | `ssg.rwamp.api.publisher` | Multi-format API publishing | 54 | 91% |
+| `rwamp-api-web-services` | `ssg.rwamp.api.webservices` | JAX-RS annotation scanning (weak dep) | 56 | 88% |
 | `rwamp-demos` | `ssg.rwamp.demo` | Usage examples & scenarios | n/a | n/a |
-| **Total** | | | **92** | **86.9%** |
+| **Total** | | | **270** | **92%** |
 
 ---
 
@@ -261,22 +279,25 @@ JaCoCo 0.8.14 agent is wired into all test tasks. Run coverage verification:
 ```
 
 Coverage thresholds:
-- **Aggregate**: 80% minimum (actual: 86.9%)
+- **Aggregate**: 80% minimum (actual: 91%)
 - **Per-module**: 50% minimum
 
 Coverage by module:
 
 | Module | Line Coverage |
 |--------|--------------|
-| session | 89.2% |
-| statistics | 95.5% |
-| testament | 93.5% |
-| virtual | 93.3% |
-| reflection | 87.4% |
-| rest | 81.1% |
-| rerouting | 59.1% |
-| registration | 92.9% |
-| **Aggregate** | **86.9%** |
+| session | 91% |
+| statistics | 94% |
+| testament | 92% |
+| virtual | 94% |
+| reflection | 87% |
+| rest | 81% |
+| rerouting | 96% |
+| registration | 93% |
+| api-providers | 96% |
+| api-publishers | 91% |
+| api-web-services | 88% |
+| **Aggregate** | **92%** |
 
 ---
 
@@ -300,6 +321,9 @@ Coverage by module:
 | [rest](rwamp-rest/) | [README](rwamp-rest/README.md) | [Architecture](rwamp-rest/doc/ARCHITECTURE.md) | [Requirements](rwamp-rest/doc/REQUIREMENTS.md) | [Code Overview](rwamp-rest/doc/CODE_OVERVIEW.md) | [Compliance](rwamp-rest/doc/COMPLIANCE.md) |
 | [rerouting](rwamp-feature-rerouting/) | [README](rwamp-feature-rerouting/README.md) | [Architecture](rwamp-feature-rerouting/doc/ARCHITECTURE.md) | [Requirements](rwamp-feature-rerouting/doc/REQUIREMENTS.md) | [Code Overview](rwamp-feature-rerouting/doc/CODE_OVERVIEW.md) | [Compliance](rwamp-feature-rerouting/doc/COMPLIANCE.md) |
 | [registration](rwamp-feature-registration/) | [README](rwamp-feature-registration/README.md) | [Architecture](rwamp-feature-registration/doc/ARCHITECTURE.md) | [Requirements](rwamp-feature-registration/doc/REQUIREMENTS.md) | [Code Overview](rwamp-feature-registration/doc/CODE_OVERVIEW.md) | [Compliance](rwamp-feature-registration/doc/COMPLIANCE.md) |
+| [api-providers](rwamp-api-providers/) | [README](rwamp-api-providers/README.md) | [Architecture](rwamp-api-providers/doc/ARCHITECTURE.md) | [Requirements](rwamp-api-providers/doc/REQUIREMENTS.md) | [Code Overview](rwamp-api-providers/doc/CODE_OVERVIEW.md) | [Compliance](rwamp-api-providers/doc/COMPLIANCE.md) |
+| [api-publishers](rwamp-api-publishers/) | [README](rwamp-api-publishers/README.md) | [Architecture](rwamp-api-publishers/doc/ARCHITECTURE.md) | [Requirements](rwamp-api-publishers/doc/REQUIREMENTS.md) | [Code Overview](rwamp-api-publishers/doc/CODE_OVERVIEW.md) | [Compliance](rwamp-api-publishers/doc/COMPLIANCE.md) |
+| [api-web-services](rwamp-api-web-services/) | [README](rwamp-api-web-services/README.md) | [Architecture](rwamp-api-web-services/doc/ARCHITECTURE.md) | [Requirements](rwamp-api-web-services/doc/REQUIREMENTS.md) | [Code Overview](rwamp-api-web-services/doc/CODE_OVERVIEW.md) | [Compliance](rwamp-api-web-services/doc/COMPLIANCE.md) |
 | [demos](rwamp-demos/) | [README](rwamp-demos/README.md) | [Architecture](rwamp-demos/doc/ARCHITECTURE.md) | [Requirements](rwamp-demos/doc/REQUIREMENTS.md) | [Code Overview](rwamp-demos/doc/CODE_OVERVIEW.md) | n/a |
 
 ---

@@ -2,6 +2,7 @@ package ssg.rwamp.feature.reflection;
 
 import ssg.legoflow.wamp.core.router.Broker;
 import ssg.legoflow.wamp.core.router.Dealer;
+import ssg.legoflow.wamp.core.router.WampRouter;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,6 +30,11 @@ public class ReflectionRegistry {
     private final Broker broker;
     /** user-defined type/error definitions (not from protocol) */
     private final Map<String, Map<String, Object>> definitions = new LinkedHashMap<>();
+
+    /** Creates a new registry from a WAMP router. */
+    public static ReflectionRegistry createFor(WampRouter router) {
+        return new ReflectionRegistry(router.getDealer(), router.getBroker());
+    }
 
     /**
      * Creates a new registry backed by the given Dealer and Broker.

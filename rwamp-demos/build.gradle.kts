@@ -38,6 +38,11 @@ dependencies {
     api(project(":rwamp-rest"))
     api(project(":rwamp-feature-registration"))
 
+    // RWAMP API modules
+    api(project(":rwamp-api-providers"))
+    api(project(":rwamp-api-publishers"))
+    api(project(":rwamp-api-web-services"))
+
     // Logging
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
 }
