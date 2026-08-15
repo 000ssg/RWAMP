@@ -23,6 +23,19 @@ import ssg.rwamp.api.provider.model.ApiDefinition;
 public interface ApiProvider {
 
     /**
+     * Returns true if this provider is operable — i.e., its required
+     * dependencies are available and it can process targets.
+     * <p>
+     * Defaults to {@code true}. Override to implement a classpath guard
+     * (e.g. for providers that rely on optional annotation libraries).
+     *
+     * @return true if this provider is ready to handle targets
+     */
+    default boolean isOperable() {
+        return true;
+    }
+
+    /**
      * Returns true if this provider can handle the given target.
      *
      * @param target a {@code Class}, object instance, or configuration map

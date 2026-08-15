@@ -22,6 +22,7 @@
         <dependency><groupId>ssg</groupId><artifactId>rwamp-rest</artifactId></dependency>
         <dependency><groupId>ssg</groupId><artifactId>rwamp-api-providers</artifactId></dependency>
         <dependency><groupId>ssg</groupId><artifactId>rwamp-api-publishers</artifactId></dependency>
+        <dependency><groupId>ssg</groupId><artifactId>rwamp-api-web-services</artifactId></dependency>
         <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></dependency>
     </dependencies>
 </project>

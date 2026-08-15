@@ -24,6 +24,7 @@
         <module>rwamp-feature-registration</module>
         <module>rwamp-api-providers</module>
         <module>rwamp-api-publishers</module>
+        <module>rwamp-api-web-services</module>
         <module>rwamp-demos</module>
     </modules>
 
@@ -88,6 +89,11 @@
             <dependency>
                 <groupId>ssg</groupId>
                 <artifactId>rwamp-api-publishers</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ssg</groupId>
+                <artifactId>rwamp-api-web-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

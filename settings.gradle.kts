@@ -11,5 +11,6 @@ include(
     "rwamp-feature-registration",
     "rwamp-api-providers",
     "rwamp-api-publishers",
+    "rwamp-api-web-services",
     "rwamp-demos"
 )

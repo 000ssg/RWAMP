@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>ssg</groupId>
+        <artifactId>rwamp</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>rwamp-api-web-services</artifactId>
+    <name>RWAMP — Web Services API Provider (dynamic annotation scanning)</name>
+    <description>
+        Discovers API operations from web-service annotations (JAX-RS, Jakarta EE)
+        using dynamic class loading — no compile-time dependency on external libraries.
+        The provider gracefully degrades when annotation libraries are absent from the classpath.
+    </description>
+    <dependencies>
+        <dependency><groupId>ssg</groupId><artifactId>rwamp-api-providers</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></dependency>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>org.assertj</groupId><artifactId>assertj-core</artifactId><scope>test</scope></dependency>
+    </dependencies>
+</project>

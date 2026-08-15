@@ -9,4 +9,5 @@ dependencies {
     "implementation"(project(":rwamp-rest"))
     "implementation"(project(":rwamp-api-providers"))
     "implementation"(project(":rwamp-api-publishers"))
+    "implementation"(project(":rwamp-api-web-services"))
 }

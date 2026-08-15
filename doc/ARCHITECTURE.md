@@ -36,6 +36,9 @@ graph LR
         rest["rwamp-rest"]
         rerouting["rwamp-feature-rerouting"]
         registration["rwamp-feature-registration"]
+        api-providers["rwamp-api-providers"]
+        api-publishers["rwamp-api-publishers"]
+        api-web-services["rwamp-api-web-services"]
     end
 
     session --> LF
@@ -48,6 +51,9 @@ graph LR
     rest --> reflection
     rerouting --> LF
     registration --> LF
+    api-providers --> LF
+    api-publishers --> api-providers
+    api-web-services --> api-providers
 ```
 
 ## Design Patterns
@@ -119,6 +125,14 @@ Stateful management classes (`TestamentManager`, `VirtualSessionManager`, `Refle
 
 **rwamp-feature-registration**: `RegistrationInterceptor` intercepts messages before the router. `PatternRegistry` stores pattern registrations. Supports exact, prefix, and wildcard matching.
 
+### Phase 5 — API Discovery & Publishing
+
+**rwamp-api-providers**: Strategy interface `ApiProvider` for discovering API definitions from Java classes. Implementations: `AnnotationBasedApiProvider` (scans `@ApiService`/`@Operation` annotations), `GetterSetterApiProvider` (derives from JavaBean properties), `ManualApiProvider` (programmatic builder). Produces `ApiDefinition` → `ApiGroup` → `ApiOperation` model.
+
+**rwamp-api-publishers**: Strategy interface `ApiPublisher` for exposing API definitions in various formats. Implementations: `OpenApiPublisher` (OpenAPI 3.1.x JSON/YAML), `WampApiPublisher` (WAMP procedure registration), `RestApiPublisher` (HTTP endpoint wiring), `HtmlApiPublisher` (interactive documentation).
+
+**rwamp-api-web-services**: xLib-inspired weak dependency pattern for scanning web-service annotations. `AnnotationScanner` dynamically loads annotation classes via `Class.forName()` — zero compile-time dependency on JAX-RS. `JaxRsApiProvider` auto-detects Jakarta EE vs Java EE namespace. `GenericAnnotationApiProvider` allows user-configured annotation sets. Gracefully degrades when annotations are absent from classpath.
+
 ## Versioning
 
 | Project | Version |
@@ -133,4 +147,4 @@ Stateful management classes (`TestamentManager`, `VirtualSessionManager`, `Refle
 
 ---
 
-**Last Updated**: 2026-08-14
+**Last Updated**: 2026-08-15

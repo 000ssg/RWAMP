@@ -8,6 +8,7 @@ import ssg.rwamp.demo.composite.MultiRealmDemo;
 import ssg.rwamp.demo.composite.MultiTopicPubSubDemo;
 import ssg.rwamp.demo.composite.SharedRegistrationDemo;
 import ssg.rwamp.demo.feature.*;
+import ssg.rwamp.demo.feature.WebServicesDemo;
 import ssg.rwamp.demo.simple.SessionManagementDemo;
 import ssg.rwamp.demo.simple.SimplePubSubDemo;
 import ssg.rwamp.demo.simple.SimpleRpcDemo;
@@ -58,6 +59,7 @@ public final class DemoRunner {
         run("REST Bridge", RestBridgeDemo::main);
         run("API Providers", ApiProvidersDemo::main);
         run("API Publishers", ApiPublishersDemo::main);
+        run("Web Services", WebServicesDemo::main);
 
         // Advanced demos
         run("Multi-Router", MultiRouterDemo::main);
@@ -89,6 +91,7 @@ public final class DemoRunner {
             case "rest" -> RestBridgeDemo.main(new String[0]);
             case "providers" -> ApiProvidersDemo.main(new String[0]);
             case "publishers" -> ApiPublishersDemo.main(new String[0]);
+            case "webservices" -> WebServicesDemo.main(new String[0]);
             case "multi-router" -> MultiRouterDemo.main(new String[0]);
             case "multi-version" -> MultiVersionApiDemo.main(new String[0]);
             case "composite" -> CompositeScenarioDemo.main(new String[0]);
