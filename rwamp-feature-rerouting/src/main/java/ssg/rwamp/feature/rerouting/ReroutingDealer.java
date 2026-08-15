@@ -86,6 +86,14 @@ public class ReroutingDealer implements WampTransport {
         return null;
     }
 
+    /**
+     * Creates the queue used for forwarding results.
+     * Protected for testability — tests can override to inject a controlled queue.
+     */
+    protected BlockingQueue<WampMessage> createForwardQueue() {
+        return new LinkedBlockingQueue<>();
+    }
+
     private WampMessage.Invocation rerouteCall(WampMessage.Call call,
                                                 Map<String, Object> reroute,
                                                 WampTransport callerTransport) {
@@ -109,7 +117,8 @@ public class ReroutingDealer implements WampTransport {
         }
 
         // Create a forwarding transport to capture the result
-        var forwardResultQueue = new LinkedBlockingQueue<WampMessage>();
+        // Protected factory method for testability
+        var forwardResultQueue = createForwardQueue();
         var forwardTransport = new QueueTransport(forwardResultQueue);
 
         // Create the forwarded call with the target procedure
@@ -150,7 +159,7 @@ public class ReroutingDealer implements WampTransport {
     /**
      * Simple queue-based transport for capturing forwarded results.
      */
-    private static class QueueTransport implements WampTransport {
+    static class QueueTransport implements WampTransport {
         private final BlockingQueue<WampMessage> queue;
 
         QueueTransport(BlockingQueue<WampMessage> queue) {

@@ -116,7 +116,7 @@ public class OpenApiSpecGenerator {
                 }
                 // Also register parameter types
                 for (var param : op.parameters()) {
-                    if (!param.type().isScalar() && param.type().javaType() != null) {
+                    if (param.type() != null && !param.type().isScalar() && param.type().javaType() != null) {
                         String name = schemaName(param.type().javaType());
                         if (!schemas.containsKey(name)) {
                             schemas.put(name, buildJsonSchema(param.type()));
@@ -214,7 +214,7 @@ public class OpenApiSpecGenerator {
         if (!op.parameters().isEmpty()) {
             var params = new ArrayList<Object>();
             for (var param : op.parameters()) {
-                if (param.kind() == ApiParameterKind.INPUT && param.type().isScalar()) {
+                if (param.kind() == ApiParameterKind.INPUT && param.type() != null && param.type().isScalar()) {
                     params.add(buildParameter(param));
                 }
             }
@@ -227,7 +227,7 @@ public class OpenApiSpecGenerator {
                 m.equals("post") || m.equals("put") || m.equals("patch"));
 
         var bodyParams = op.parameters().stream()
-                .filter(p -> p.kind() == ApiParameterKind.INPUT && !p.type().isScalar())
+                .filter(p -> p.kind() == ApiParameterKind.INPUT && p.type() != null && !p.type().isScalar())
                 .toList();
 
         if (isBodyMethod && !bodyParams.isEmpty()) {

@@ -3,8 +3,8 @@
 [![Java](https://img.shields.io/badge/Java-25%2B-orange.svg)](https://www.oracle.com/java/)
 [![Gradle](https://img.shields.io/badge/Gradle-9.x-green.svg)](https://gradle.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-92-brightgreen.svg)]()
-[![Coverage](https://img.shields.io/badge/Coverage-86.9%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-197-brightgreen.svg)]()
+[![Coverage](https://img.shields.io/badge/Coverage-91%25-brightgreen.svg)]()
 [![Version](https://img.shields.io/badge/Version-0.1.0-SNAPSHOT-blue.svg)]()
 
 Production-grade WAMP v2 extension built on **lego-flow's WAMP implementation**.
@@ -100,16 +100,16 @@ graph TD
 
 | Module | Package | Purpose | Tests | Coverage |
 |--------|---------|---------|-------|----------|
-| `rwamp-feature-session` | `ssg.rwamp.feature.session` | Session kill procedures | 14 | 89.2% |
-| `rwamp-feature-statistics` | `ssg.rwamp.feature.statistics` | Statistics counters | 12 | 95.5% |
-| `rwamp-feature-testament` | `ssg.rwamp.feature.testament` | Testament scheduling | 6 | 93.5% |
-| `rwamp-feature-virtual` | `ssg.rwamp.feature.virtual` | Virtual session manager | 6 | 93.3% |
-| `rwamp-feature-reflection` | `ssg.rwamp.feature.reflection` | Introspection API | 7 | 87.4% |
-| `rwamp-rest` | `ssg.rwamp.rest` | REST over WAMP bridge | 10 | 81.1% |
-| `rwamp-feature-rerouting` | `ssg.rwamp.feature.rerouting` | Cross-realm forwarding | 7 | 59.1% |
-| `rwamp-feature-registration` | `ssg.rwamp.feature.registration` | Pattern registration & revocation | 31 | 92.9% |
+| `rwamp-feature-session` | `ssg.rwamp.feature.session` | Session kill procedures | 12 | 91% |
+| `rwamp-feature-statistics` | `ssg.rwamp.feature.statistics` | Statistics counters | 12 | 94% |
+| `rwamp-feature-testament` | `ssg.rwamp.feature.testament` | Testament scheduling | 6 | 92% |
+| `rwamp-feature-virtual` | `ssg.rwamp.feature.virtual` | Virtual session manager | 6 | 94% |
+| `rwamp-feature-reflection` | `ssg.rwamp.feature.reflection` | Introspection API | 12 | 87% |
+| `rwamp-rest` | `ssg.rwamp.rest` | REST over WAMP bridge | 10 | 80% |
+| `rwamp-feature-rerouting` | `ssg.rwamp.feature.rerouting` | Cross-realm forwarding | 30 | 95% |
+| `rwamp-feature-registration` | `ssg.rwamp.feature.registration` | Pattern registration & revocation | 31 | 90% |
 | `rwamp-demos` | `ssg.rwamp.demo` | Usage examples & scenarios | n/a | n/a |
-| **Total** | | | **92** | **86.9%** |
+| **Total** | | | **197** | **91%** |
 
 ---
 
@@ -261,22 +261,22 @@ JaCoCo 0.8.14 agent is wired into all test tasks. Run coverage verification:
 ```
 
 Coverage thresholds:
-- **Aggregate**: 80% minimum (actual: 86.9%)
+- **Aggregate**: 80% minimum (actual: 91%)
 - **Per-module**: 50% minimum
 
 Coverage by module:
 
 | Module | Line Coverage |
 |--------|--------------|
-| session | 89.2% |
-| statistics | 95.5% |
-| testament | 93.5% |
-| virtual | 93.3% |
-| reflection | 87.4% |
-| rest | 81.1% |
-| rerouting | 59.1% |
-| registration | 92.9% |
-| **Aggregate** | **86.9%** |
+| session | 91% |
+| statistics | 94% |
+| testament | 92% |
+| virtual | 94% |
+| reflection | 87% |
+| rest | 80% |
+| rerouting | 95% |
+| registration | 90% |
+| **Aggregate** | **91%** |
 
 ---
 
