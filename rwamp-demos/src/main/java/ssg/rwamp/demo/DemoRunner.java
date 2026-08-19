@@ -1,8 +1,10 @@
 package ssg.rwamp.demo;
 
 import ssg.rwamp.demo.advanced.CompositeScenarioDemo;
+import ssg.rwamp.demo.advanced.DistributedRoutingDemo;
 import ssg.rwamp.demo.advanced.MultiRouterDemo;
 import ssg.rwamp.demo.advanced.MultiVersionApiDemo;
+import ssg.rwamp.demo.advanced.TestamentLifecycleDemo;
 import ssg.rwamp.demo.composite.MultiClientRpcDemo;
 import ssg.rwamp.demo.composite.MultiRealmDemo;
 import ssg.rwamp.demo.composite.MultiTopicPubSubDemo;
@@ -48,6 +50,8 @@ import ssg.rwamp.demo.simple.SimpleRpcDemo;
  * @see MultiRouterDemo
  * @see MultiVersionApiDemo
  * @see CompositeScenarioDemo
+ * @see DistributedRoutingDemo
+ * @see TestamentLifecycleDemo
  *
  * @since 0.1.0
  */
@@ -90,6 +94,8 @@ public final class DemoRunner {
         run("Multi-Router", MultiRouterDemo::main);
         run("Multi-Version API", MultiVersionApiDemo::main);
         run("Composite Scenario", CompositeScenarioDemo::main);
+        run("Distributed Routing", DistributedRoutingDemo::main);
+        run("Testament Lifecycle", TestamentLifecycleDemo::main);
 
         System.out.println();
         System.out.println("All demos completed.");
@@ -120,6 +126,8 @@ public final class DemoRunner {
             case "multi-router" -> MultiRouterDemo.main(new String[0]);
             case "multi-version" -> MultiVersionApiDemo.main(new String[0]);
             case "composite" -> CompositeScenarioDemo.main(new String[0]);
+            case "distributed" -> DistributedRoutingDemo.main(new String[0]);
+            case "testament-lifecycle" -> TestamentLifecycleDemo.main(new String[0]);
             default -> System.out.println("Unknown demo: " + name);
         }
     }

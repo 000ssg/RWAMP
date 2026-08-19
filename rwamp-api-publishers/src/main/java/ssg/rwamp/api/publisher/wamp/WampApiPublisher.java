@@ -5,7 +5,6 @@ import ssg.legoflow.wamp.core.transport.WampTransport;
 import ssg.rwamp.api.provider.model.*;
 import ssg.rwamp.api.publisher.ApiPublisher;
 import ssg.rwamp.feature.reflection.ReflectionApi;
-import ssg.rwamp.feature.reflection.ReflectionRegistry;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

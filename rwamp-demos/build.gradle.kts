@@ -46,3 +46,31 @@ dependencies {
     // Logging
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
 }
+
+tasks.register<JavaExec>("runDemos") {
+    description = "Run all RWAMP demos"
+    group = "verification"
+    mainClass = "ssg.rwamp.demo.DemoRunner"
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("runDistributedRouting") {
+    description = "Run Distributed Routing demo"
+    group = "verification"
+    mainClass = "ssg.rwamp.demo.advanced.DistributedRoutingDemo"
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("runTestamentLifecycle") {
+    description = "Run Testament Lifecycle demo"  
+    group = "verification"
+    mainClass = "ssg.rwamp.demo.advanced.TestamentLifecycleDemo"
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("runAllDemos") {
+    description = "Run all RWAMP demos via DemoRunner"
+    group = "verification"
+    mainClass = "ssg.rwamp.demo.DemoRunner"
+    classpath = sourceSets["main"].runtimeClasspath
+}

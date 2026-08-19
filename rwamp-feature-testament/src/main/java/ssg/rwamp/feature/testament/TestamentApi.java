@@ -1,7 +1,6 @@
 package ssg.rwamp.feature.testament;
 
 import ssg.legoflow.wamp.core.WampMessage;
-import ssg.legoflow.wamp.core.WampMessageType;
 import ssg.legoflow.wamp.core.router.Broker;
 import ssg.legoflow.wamp.core.router.WampRouter;
 import ssg.legoflow.wamp.core.transport.WampTransport;
