@@ -7,7 +7,6 @@ import ssg.rwamp.api.publisher.openapi.OpenApiPublisher;
 import ssg.rwamp.api.publisher.wamp.WampApiPublisher;
 import ssg.rwamp.api.publisher.jsdoc.JsDocPublisher;
 import ssg.rwamp.api.publisher.rest.RestPublisher;
-import ssg.rwamp.feature.reflection.ReflectionRegistry;
 import ssg.rwamp.feature.virtual.VirtualSessionManager;
 
 import java.util.*;

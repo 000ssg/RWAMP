@@ -17,7 +17,6 @@ import ssg.rwamp.feature.testament.TestamentManager;
 import ssg.rwamp.feature.virtual.VirtualSessionApi;
 import ssg.rwamp.feature.virtual.VirtualSessionManager;
 import ssg.rwamp.rest.RestRequest;
-import ssg.rwamp.rest.RestResponse;
 import ssg.rwamp.rest.RestWampBridge;
 
 import java.util.ArrayList;

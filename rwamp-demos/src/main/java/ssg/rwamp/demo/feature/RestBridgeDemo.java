@@ -6,13 +6,11 @@ import ssg.legoflow.wamp.core.realm.Realm;
 import ssg.legoflow.wamp.core.router.WampRouter;
 import ssg.rwamp.demo.infrastructure.InMemoryTransport;
 import ssg.rwamp.feature.reflection.ReflectionApi;
-import ssg.rwamp.feature.reflection.ReflectionRegistry;
 import ssg.rwamp.feature.session.SessionMetaApi;
 import ssg.rwamp.feature.session.SessionTransportTracker;
 import ssg.rwamp.feature.virtual.VirtualSessionApi;
 import ssg.rwamp.feature.virtual.VirtualSessionManager;
 import ssg.rwamp.rest.RestRequest;
-import ssg.rwamp.rest.RestResponse;
 import ssg.rwamp.rest.RestWampBridge;
 
 import java.util.List;

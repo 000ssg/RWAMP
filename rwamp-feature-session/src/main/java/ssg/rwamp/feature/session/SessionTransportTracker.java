@@ -1,6 +1,5 @@
 package ssg.rwamp.feature.session;
 
-import ssg.legoflow.wamp.core.WampSession;
 import ssg.legoflow.wamp.core.transport.WampTransport;
 
 import java.util.Map;

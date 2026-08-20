@@ -1,7 +1,6 @@
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.InputFile;
 
 import org.jacoco.core.tools.ExecFileLoader;
 import org.jacoco.core.data.ExecutionDataStore;

@@ -1,14 +1,12 @@
 package ssg.rwamp.demo.advanced;
 
 import ssg.legoflow.wamp.core.WampMessage;
-import ssg.legoflow.wamp.core.WampSession;
 import ssg.legoflow.wamp.core.realm.Realm;
 import ssg.legoflow.wamp.core.router.WampRouter;
 import ssg.rwamp.demo.infrastructure.InMemoryTransport;
 import ssg.rwamp.feature.reflection.ReflectionApi;
 import ssg.rwamp.feature.virtual.VirtualSessionManager;
 import ssg.rwamp.rest.RestRequest;
-import ssg.rwamp.rest.RestResponse;
 import ssg.rwamp.rest.RestWampBridge;
 
 import java.util.List;

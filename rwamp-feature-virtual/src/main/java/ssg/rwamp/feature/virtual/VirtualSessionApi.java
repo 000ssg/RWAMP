@@ -1,8 +1,6 @@
 package ssg.rwamp.feature.virtual;
 
 import ssg.legoflow.wamp.core.WampMessage;
-import ssg.legoflow.wamp.core.WampSession;
-import ssg.legoflow.wamp.core.WampMessageType;
 import ssg.legoflow.wamp.core.realm.Realm;
 import ssg.legoflow.wamp.core.router.WampRouter;
 import ssg.legoflow.wamp.core.transport.WampTransport;
